@@ -22,6 +22,12 @@ const bookRoutes = require('./routes/bookRoutes');
 // Usa as rotas de livros no caminho '/livros'
 app.use('/livros', bookRoutes);
 
+// Importa as rotas de usuários
+const userRoutes = require('./routes/userRoutes');
+
+// Usa as rotas de usuários no caminho '/usuarios'
+app.use('/usuarios', userRoutes);
+
 // Rota de teste simples (ver se está funcionando)
 app.get('/', (req, res) => {
   res.send('Servidor LivroLivre rodando! EBAAAA!');
