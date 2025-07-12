@@ -2,31 +2,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function CadastroLivro() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
 
-  // estados dos campos
   const [form, setForm] = useState({
     titulo: "",
     autor: "",
-    doador: "",
-    chaveStellar: "",
   });
   const [erro, setErro] = useState("");
 
-  // atualiza cada campo
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // envia para o backend
   async function handleSubmit(e) {
     e.preventDefault();
     setErro("");
 
     try {
-      await axios.post("http://localhost:3001/livros", form);
+      // Envia título, autor, e pega doador/chave do usuário logado
+      await axios.post("http://localhost:3001/livros", {
+        ...form,
+        doador: usuario.nome,
+        chaveStellar: usuario.chaveStellar,
+      });
       navigate("/"); // volta para a lista
     } catch (err) {
       setErro("Erro ao cadastrar. Verifique os dados.");
@@ -59,30 +61,6 @@ export default function CadastroLivro() {
           <input
             name="autor"
             value={form.autor}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/** DOADOR */}
-        <div>
-          <label className="block text-sm font-medium">Doador</label>
-          <input
-            name="doador"
-            value={form.doador}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/** CHAVE STELLAR */}
-        <div>
-          <label className="block text-sm font-medium">Chave Stellar (G...)</label>
-          <input
-            name="chaveStellar"
-            value={form.chaveStellar}
             onChange={handleChange}
             required
             className="w-full border px-3 py-2 rounded"
