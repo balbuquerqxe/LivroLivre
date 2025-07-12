@@ -1,0 +1,3 @@
+// Esse arquivo é de extrema importância ao indicar quais arquivos devem ser ignorados pelo Git.
+//Possui informações sensíveis.
+.env
