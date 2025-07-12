@@ -58,7 +58,14 @@ async function adotarLivro(req, resposta) {
         // Mostra que deu tudo certo
         resposta.json({ mensagem: 'Livro adotado e token enviado!', livro });
     } catch (erro) {
-        console.error(erro);
+        if (erro.response?.data?.extras?.hash) {
+            console.log("Hash da transação (mesmo com erro):", erro.response.data.extras.hash);
+        } else if (erro.response?.data?.extras) {
+            console.log("Extras completos:", JSON.stringify(erro.response.data.extras, null, 2));
+        } else {
+            console.error("Erro ao enviar token via Stellar:", erro.message || erro);
+        }
+
         resposta.status(500).json({ erro: 'Erro ao enviar token via Stellar.' });
     }
 }
