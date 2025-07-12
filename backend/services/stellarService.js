@@ -64,3 +64,40 @@ function gerarChavesStellar() {
     secret: par.secret(),
   };
 }
+
+// Função para criar uma trustline para o token
+async function criarTrustline(secret) {
+
+  // Carrega a conta do usuário usando a chave secreta
+  const chave = StellarSdk.Keypair.fromSecret(secret);
+
+  // Carrega a conta do usuário na rede Stellar Testnet
+  const conta = await server.loadAccount(chave.publicKey());
+
+  // Obtém a taxa de transação base da rede Stellar Testnet
+  const fee = await server.fetchBaseFee();
+
+  // Cria a transação para estabelecer a trustline
+  const tx = new StellarSdk.TransactionBuilder(conta, {
+    fee,
+    networkPassphrase: StellarSdk.Networks.TESTNET
+  })
+    .addOperation(StellarSdk.Operation.changeTrust({
+      asset: asset,
+    }))
+    .setTimeout(30)
+    .build();
+
+  // Assina a transação com a chave secreta do usuário
+  tx.sign(chave);
+
+  // Envia a transação para o servidor da Stellar Testnet
+  await server.submitTransaction(tx);
+}
+
+// Para poder ser usado em outros arquivos
+module.exports = {
+  sendBookToken,
+  gerarChavesStellar,
+  criarTrustline
+};
