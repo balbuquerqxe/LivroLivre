@@ -70,9 +70,23 @@ async function adotarLivro(req, resposta) {
     }
 }
 
+// Importa a lista de livros (assumindo que é salvo em memória em /data/livros.js)
+const livros = require('../data/livros');
+
+// Função para listar os livros doados e adotados por um usuário (baseado no e-mail)
+function listarLivrosDoUsuario(req, res) {
+    const email = req.params.email;
+
+    const doados = livros.filter(l => l.doador === email);
+    const adotados = livros.filter(l => l.adotadoPor === email);
+
+    res.json({ doados, adotados });
+}
+
 // Exportamos de novo para facilitar a utilização futura.
 module.exports = {
     cadastrarLivro,
     listarLivros,
-    adotarLivro
+    adotarLivro,
+    listarLivrosDoUsuario
 };
