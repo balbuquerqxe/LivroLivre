@@ -5,7 +5,8 @@ const StellarSdk = require('stellar-sdk');
 require('dotenv').config();
 
 // Conexão com o servidor da Stellar Testnet
-const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+const { getServer } = require('stellar-sdk');
+const server = getServer('TESTNET');
 
 // Criação de um par de chaves para o emissor do token
 const issuingKeypair = StellarSdk.Keypair.fromSecret(process.env.STELLAR_SECRET);
