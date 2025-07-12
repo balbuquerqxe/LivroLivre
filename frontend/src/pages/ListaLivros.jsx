@@ -8,16 +8,17 @@ export default function ListaLivros() {
   const [modalAberto, setModalAberto] = useState(false);
   const [livroSelecionado, setLivroSelecionado] = useState(null);
 
-  const { usuario, atualizarCreditos } = useAuth();  // ⬅️ importa a função
+  const [filtroTitulo, setFiltroTitulo] = useState('');   // ⬅️ NOVO
+  const [filtroAutor, setFiltroAutor] = useState('');     // ⬅️ NOVO
 
-  // Carrega todos os livros ao abrir a tela
+  const { usuario, atualizarCreditos } = useAuth();
+
   useEffect(() => {
     axios.get('http://localhost:3001/livros')
       .then(response => setLivros(response.data))
       .catch(error => console.error('Erro ao buscar livros:', error));
   }, []);
 
-  // Chamada quando o usuário confirma a adoção
   const handleAdocaoConfirmada = async () => {
     if (!usuario?.nome) {
       alert('Você precisa estar logado para adotar um livro.');
@@ -40,9 +41,7 @@ export default function ListaLivros() {
         prev.map(l => (l.id === livroAtualizado.id ? livroAtualizado : l))
       );
 
-      // ⬇️ Atualiza créditos do usuário
       await atualizarCreditos(usuario.email);
-
       setModalAberto(false);
     } catch (err) {
       console.error('Erro ao adotar livro:', err);
@@ -54,30 +53,54 @@ export default function ListaLivros() {
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Livros Disponíveis</h1>
+
+      {/* Campos de filtro */} {/* ⬅️ NOVO */}
+      <div className="flex gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Filtrar por título"
+          value={filtroTitulo}
+          onChange={e => setFiltroTitulo(e.target.value)}
+          className="border p-2 rounded flex-1"
+        />
+        <input
+          type="text"
+          placeholder="Filtrar por autor"
+          value={filtroAutor}
+          onChange={e => setFiltroAutor(e.target.value)}
+          className="border p-2 rounded flex-1"
+        />
+      </div>
+
       {livros.length === 0 ? (
         <p className="text-gray-500">Nenhum livro disponível.</p>
       ) : (
         <ul className="space-y-4">
-          {livros.filter(l => !l.adotadoPor).map(livro => (
-            <li key={livro.id} className="border p-4 rounded">
-              <p><strong>Título:</strong> {livro.titulo}</p>
-              <p><strong>Autor:</strong> {livro.autor}</p>
-              <p><strong>Doador:</strong> {livro.doador}</p>
-              <button
-                className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-                onClick={() => {
-                  setLivroSelecionado(livro);
-                  setModalAberto(true);
-                }}
-              >
-                Adotar
-              </button>
-            </li>
-          ))}
+          {livros
+            .filter(l =>
+              !l.adotadoPor &&
+              l.titulo.toLowerCase().includes(filtroTitulo.toLowerCase()) &&   // ⬅️ NOVO
+              l.autor.toLowerCase().includes(filtroAutor.toLowerCase())        // ⬅️ NOVO
+            )
+            .map(livro => (
+              <li key={livro.id} className="border p-4 rounded">
+                <p><strong>Título:</strong> {livro.titulo}</p>
+                <p><strong>Autor:</strong> {livro.autor}</p>
+                <p><strong>Doador:</strong> {livro.doador}</p>
+                <button
+                  className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                  onClick={() => {
+                    setLivroSelecionado(livro);
+                    setModalAberto(true);
+                  }}
+                >
+                  Adotar
+                </button>
+              </li>
+            ))}
         </ul>
       )}
 
-      {/* Modal de confirmação da adoção */}
       {modalAberto && livroSelecionado && (
         <AdotarModal
           isOpen={modalAberto}
