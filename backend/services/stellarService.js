@@ -1,5 +1,6 @@
 // Importar biblioteca da Stellar
 const StellarSdk = require('stellar-sdk');
+const { getServer } = require('stellar-sdk');
 
 // Carrega o arquivo .env! Tem as informações sensíveis!!
 require('dotenv').config();
