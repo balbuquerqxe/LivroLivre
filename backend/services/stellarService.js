@@ -26,7 +26,7 @@ async function sendBookToken(receiverPublicKey) {
       fee,
       networkPassphrase: StellarSdk.Networks.TESTNET
     })
-        // Adiciona a operação de pagamento!!
+      // Adiciona a operação de pagamento!!
       .addOperation(StellarSdk.Operation.payment({
         destination: receiverPublicKey,
         asset: asset,
@@ -52,5 +52,15 @@ async function sendBookToken(receiverPublicKey) {
   }
 }
 
-// Para poder ser usado em outros arquivos
-module.exports = { sendBookToken };
+// Função para gerar chaves Stellar para os usuários
+function gerarChavesStellar() {
+
+  // Gera um par de chaves aleatórias
+  const par = StellarSdk.Keypair.random();
+
+  // Retorna a chave pública e a chave secreta
+  return {
+    publicKey: par.publicKey(),
+    secret: par.secret(),
+  };
+}
