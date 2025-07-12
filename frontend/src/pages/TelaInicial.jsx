@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Wave from 'react-wavify';
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png'; // ⬅️ ajuste o caminho conforme necessário
+import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png';
 
 export default function TelaInicial() {
     const navigate = useNavigate();

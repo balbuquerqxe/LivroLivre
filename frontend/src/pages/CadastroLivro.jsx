@@ -1,17 +1,15 @@
-// src/pages/CadastroLivro.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
+import Wave from "react-wavify";
+import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png';
 
 export default function CadastroLivro() {
   const navigate = useNavigate();
-  const { usuario, atualizarCreditos } = useAuth(); // ← agora inclui a função
+  const { usuario, atualizarCreditos } = useAuth();
 
-  const [form, setForm] = useState({
-    titulo: "",
-    autor: "",
-  });
+  const [form, setForm] = useState({ titulo: "", autor: "" });
   const [erro, setErro] = useState("");
 
   function handleChange(e) {
@@ -23,17 +21,14 @@ export default function CadastroLivro() {
     setErro("");
 
     try {
-      // Envia título, autor, e pega doador/chave do usuário logado
       await axios.post("http://localhost:3001/livros", {
         ...form,
         doador: usuario.email,
         chaveStellar: usuario.chaveStellar,
       });
 
-      // ✅ Atualiza os créditos após a doação
       await atualizarCreditos(usuario.email);
-
-      navigate("/"); // volta para a lista
+      navigate("/"); // volta para a tela pós-login
     } catch (err) {
       setErro("Erro ao cadastrar. Verifique os dados.");
       console.error(err);
@@ -41,43 +36,57 @@ export default function CadastroLivro() {
   }
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Cadastrar Livro</h1>
+    <div className="relative min-h-screen flex flex-col items-center justify-start bg-green-700 px-4 py-10 text-white overflow-hidden">
+      {/* Onda */}
+      <Wave
+        fill="#56c27cff"
+        paused={false}
+        options={{ height: 80, amplitude: 100, speed: 0.25, points: 5 }}
+        className="absolute bottom-0 left-0 w-full h-[40vh] z-0"
+      />
 
-      {erro && <p className="mb-4 text-red-600">{erro}</p>}
+      {/* Logo */}
+      <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/** TÍTULO */}
-        <div>
-          <label className="block text-sm font-medium">Título</label>
-          <input
-            name="titulo"
-            value={form.titulo}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
+      {/* Cartão de cadastro */}
+      <div className="bg-white text-black z-10 p-6 rounded shadow w-full max-w-lg">
+        <h1 className="text-2xl font-bold mb-4 text-green-700">Cadastrar Livro</h1>
 
-        {/** AUTOR */}
-        <div>
-          <label className="block text-sm font-medium">Autor</label>
-          <input
-            name="autor"
-            value={form.autor}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
+        {erro && <p className="mb-4 text-red-600">{erro}</p>}
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
-        >
-          Salvar
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Título */}
+          <div>
+            <label className="block text-sm font-medium text-green-700">Título</label>
+            <input
+              name="titulo"
+              value={form.titulo}
+              onChange={handleChange}
+              required
+              className="w-full border border-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
+            />
+          </div>
+
+          {/* Autor */}
+          <div>
+            <label className="block text-sm font-medium text-green-700">Autor</label>
+            <input
+              name="autor"
+              value={form.autor}
+              onChange={handleChange}
+              required
+              className="w-full border border-green-700 px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded w-full font-semibold"
+          >
+            Salvar
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

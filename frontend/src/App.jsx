@@ -6,7 +6,7 @@ import CadastroLivro from './pages/CadastroLivro';
 import CadastroUsuario from './pages/CadastroUsuario';
 import Login from './pages/LoginUsuario';
 import MeusLivros from './pages/MeusLivros';
-import TelaInicial from './pages/TelaInicial'; // ✅ Importação da nova tela
+import TelaInicial from './pages/TelaInicial'; // mantém a tela pública
 
 export default function App() {
   const { usuario, logout, carregando } = useAuth();
@@ -40,7 +40,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
 
-        {/* Rotas privadas */}
+        {/* Rota principal agora abre direto a lista */}
         <Route path="/" element={usuario ? <ListaLivros /> : <Navigate to="/inicio" />} />
         <Route path="/cadastro" element={usuario ? <CadastroLivro /> : <Navigate to="/inicio" />} />
         <Route path="/meus-livros" element={usuario ? <MeusLivros /> : <Navigate to="/inicio" />} />
