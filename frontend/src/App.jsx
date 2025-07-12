@@ -1,16 +1,17 @@
 import { Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+
 import ListaLivros from './pages/ListaLivros';
 import CadastroLivro from './pages/CadastroLivro';
 import CadastroUsuario from './pages/CadastroUsuario';
 import Login from './pages/LoginUsuario';
 import MeusLivros from './pages/MeusLivros';
+import TelaInicial from './pages/TelaInicial'; // ✅ Importação da nova tela
 
 export default function App() {
   const { usuario, logout, carregando } = useAuth();
   const navigate = useNavigate();
 
-  // Evita renderizar qualquer coisa até terminar de checar o localStorage
   if (carregando) return null;
 
   return (
@@ -32,17 +33,20 @@ export default function App() {
       )}
 
       <Routes>
+        {/* Tela inicial pública */}
+        <Route path="/inicio" element={<TelaInicial />} />
+
         {/* Rotas públicas */}
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
 
         {/* Rotas privadas */}
-        <Route path="/" element={usuario ? <ListaLivros /> : <Navigate to="/login" />} />
-        <Route path="/cadastro" element={usuario ? <CadastroLivro /> : <Navigate to="/login" />} />
-        <Route path="/meus-livros" element={usuario ? <MeusLivros /> : <Navigate to="/login" />} />
+        <Route path="/" element={usuario ? <ListaLivros /> : <Navigate to="/inicio" />} />
+        <Route path="/cadastro" element={usuario ? <CadastroLivro /> : <Navigate to="/inicio" />} />
+        <Route path="/meus-livros" element={usuario ? <MeusLivros /> : <Navigate to="/inicio" />} />
 
-        {/* Qualquer outra URL → login */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Qualquer outra URL → /inicio */}
+        <Route path="*" element={<Navigate to="/inicio" />} />
       </Routes>
     </div>
   );
