@@ -1,101 +1,89 @@
-// src/pages/CadastroLivro.jsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useState } from 'react';
+import axios from 'axios';
 
-export default function CadastroLivro() {
-  const navigate = useNavigate();
+export default function CadastroUsuario() {
+  const [form, setForm] = useState({ nome: '', email: '', senha: '' });
+  const [mensagem, setMensagem] = useState('');
+  const [chavePublica, setChavePublica] = useState('');
+  const [chavePrivada, setChavePrivada] = useState('');
 
-  // estados dos campos
-  const [form, setForm] = useState({
-    titulo: "",
-    autor: "",
-    doador: "",
-    chaveStellar: "",
-  });
-  const [erro, setErro] = useState("");
-
-  // atualiza cada campo
-  function handleChange(e) {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  }
+  };
 
-  // envia para o backend
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErro("");
+    setMensagem('');
 
     try {
-      await axios.post("http://localhost:3001/livros", form);
-      navigate("/"); // volta para a lista
-    } catch (err) {
-      setErro("Erro ao cadastrar. Verifique os dados.");
-      console.error(err);
+      const response = await axios.post('http://localhost:3001/usuarios/cadastro', form);
+      const { usuario, chavePrivada } = response.data;
+
+      // Salva o usuário no localStorage
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      localStorage.setItem('chavePrivada', chavePrivada);
+
+      setChavePublica(usuario.chaveStellar);
+      setChavePrivada(chavePrivada);
+      setMensagem('Usuário cadastrado com sucesso!');
+    } catch (erro) {
+      console.error('Erro ao cadastrar usuário:', erro);
+      setMensagem('Erro ao cadastrar usuário. Verifique os dados e tente novamente.');
     }
-  }
+  };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Cadastrar Livro</h1>
-
-      {erro && <p className="mb-4 text-red-600">{erro}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/** TÍTULO */}
-        <div>
-          <label className="block text-sm font-medium">Título</label>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+      <div className="bg-white p-8 rounded shadow max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-6 text-center">Cadastro de Usuário</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            name="titulo"
-            value={form.titulo}
+            type="text"
+            name="nome"
+            placeholder="Nome"
+            value={form.nome}
             onChange={handleChange}
+            className="w-full p-2 border rounded"
             required
-            className="w-full border px-3 py-2 rounded"
           />
-        </div>
-
-        {/** AUTOR */}
-        <div>
-          <label className="block text-sm font-medium">Autor</label>
           <input
-            name="autor"
-            value={form.autor}
+            type="email"
+            name="email"
+            placeholder="E-mail"
+            value={form.email}
             onChange={handleChange}
+            className="w-full p-2 border rounded"
             required
-            className="w-full border px-3 py-2 rounded"
           />
-        </div>
-
-        {/** DOADOR */}
-        <div>
-          <label className="block text-sm font-medium">Doador</label>
           <input
-            name="doador"
-            value={form.doador}
+            type="password"
+            name="senha"
+            placeholder="Senha"
+            value={form.senha}
             onChange={handleChange}
+            className="w-full p-2 border rounded"
             required
-            className="w-full border px-3 py-2 rounded"
           />
-        </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          >
+            Cadastrar
+          </button>
+        </form>
 
-        {/** CHAVE STELLAR */}
-        <div>
-          <label className="block text-sm font-medium">Chave Stellar (G...)</label>
-          <input
-            name="chaveStellar"
-            value={form.chaveStellar}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
+        {mensagem && <p className="mt-4 text-center text-sm text-gray-700">{mensagem}</p>}
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
-        >
-          Salvar
-        </button>
-      </form>
+        {chavePublica && (
+          <div className="mt-6 text-sm text-gray-800 break-all">
+            <p><strong>Chave Pública:</strong> {chavePublica}</p>
+            <p className="mt-2"><strong>Chave Privada:</strong> {chavePrivada}</p>
+            <p className="mt-2 text-red-600 text-xs">
+              Guarde a chave privada com segurança! Ela será necessária para movimentações na blockchain.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
