@@ -21,3 +21,14 @@ function criarUsuario(nome, email, senha, chaveStellar) {
 function buscarUsuarioPorEmail(email) {
     return usuarios.find(u => u.email === email);
 }
+
+// Função que autentica um usuário com email e senha
+function autenticarUsuario(email, senha) {
+    return usuarios.find(u => u.email === email && u.senha === senha);
+}
+
+module.exports = {
+    criarUsuario,
+    buscarUsuarioPorEmail,
+    autenticarUsuario,
+};
