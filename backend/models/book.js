@@ -1,5 +1,5 @@
 // Lista com todos os livros cadastrados
-let livros = []
+const livros = require('../data/livros');
 
 // Garante que cada licro tenha um ID único
 let contadorId = 1;

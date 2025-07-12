@@ -10,17 +10,14 @@ export default function MeusLivros() {
     useEffect(() => {
         if (!usuario) return;
 
-        // Buscar livros doados (por chaveStellar)
         axios.get(`http://localhost:3001/livros/meus-doacoes/${usuario.chaveStellar}`)
             .then(res => setLivrosDoados(res.data))
             .catch(err => console.error('Erro ao buscar livros doados:', err));
 
-        // Buscar livros adotados (por nome)
         axios.get(`http://localhost:3001/livros/meus-adotados/${usuario.nome}`)
             .then(res => setLivrosAdotados(res.data))
             .catch(err => console.error('Erro ao buscar livros adotados:', err));
     }, [usuario]);
-
 
     return (
         <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow space-y-6">
