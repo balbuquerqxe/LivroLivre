@@ -35,4 +35,9 @@ function buscarLivroPorId(id) {
   return livros.find(livro => livro.id === parseInt(id));
 }
 
-
+// Exporta as funções para serem usadas em outros arquivos
+module.exports = {
+  criarLivro,
+  listarLivrosDisponiveis,
+  buscarLivroPorId
+};
