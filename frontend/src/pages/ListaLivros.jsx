@@ -7,16 +7,17 @@ export default function ListaLivros() {
   const [livros, setLivros] = useState([]);
   const [modalAberto, setModalAberto] = useState(false);
   const [livroSelecionado, setLivroSelecionado] = useState(null);
-  const [filtroTitulo, setFiltroTitulo] = useState('');
-  const [filtroAutor, setFiltroAutor] = useState('');
-  const { usuario } = useAuth();
 
+  const { usuario, atualizarCreditos } = useAuth();  // ⬅️ importa a função
+
+  // Carrega todos os livros ao abrir a tela
   useEffect(() => {
     axios.get('http://localhost:3001/livros')
       .then(response => setLivros(response.data))
       .catch(error => console.error('Erro ao buscar livros:', error));
   }, []);
 
+  // Chamada quando o usuário confirma a adoção
   const handleAdocaoConfirmada = async () => {
     if (!usuario?.nome) {
       alert('Você precisa estar logado para adotar um livro.');
@@ -38,6 +39,10 @@ export default function ListaLivros() {
       setLivros(prev =>
         prev.map(l => (l.id === livroAtualizado.id ? livroAtualizado : l))
       );
+
+      // ⬇️ Atualiza créditos do usuário
+      await atualizarCreditos(usuario.email);
+
       setModalAberto(false);
     } catch (err) {
       console.error('Erro ao adotar livro:', err);
@@ -46,40 +51,14 @@ export default function ListaLivros() {
     }
   };
 
-  // Filtro dinâmico
-  const livrosFiltrados = livros.filter(l =>
-    !l.adotadoPor &&
-    l.titulo.toLowerCase().includes(filtroTitulo.toLowerCase()) &&
-    l.autor.toLowerCase().includes(filtroAutor.toLowerCase())
-  );
-
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Livros Disponíveis</h1>
-
-      {/* Campos de filtro */}
-      <div className="mb-4 flex gap-4">
-        <input
-          type="text"
-          placeholder="Filtrar por título"
-          value={filtroTitulo}
-          onChange={e => setFiltroTitulo(e.target.value)}
-          className="flex-1 border px-3 py-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Filtrar por autor"
-          value={filtroAutor}
-          onChange={e => setFiltroAutor(e.target.value)}
-          className="flex-1 border px-3 py-2 rounded"
-        />
-      </div>
-
-      {livrosFiltrados.length === 0 ? (
-        <p className="text-gray-500">Nenhum livro encontrado.</p>
+      {livros.length === 0 ? (
+        <p className="text-gray-500">Nenhum livro disponível.</p>
       ) : (
         <ul className="space-y-4">
-          {livrosFiltrados.map(livro => (
+          {livros.filter(l => !l.adotadoPor).map(livro => (
             <li key={livro.id} className="border p-4 rounded">
               <p><strong>Título:</strong> {livro.titulo}</p>
               <p><strong>Autor:</strong> {livro.autor}</p>
@@ -98,6 +77,7 @@ export default function ListaLivros() {
         </ul>
       )}
 
+      {/* Modal de confirmação da adoção */}
       {modalAberto && livroSelecionado && (
         <AdotarModal
           isOpen={modalAberto}
