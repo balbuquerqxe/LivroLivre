@@ -26,7 +26,7 @@ export default function CadastroLivro() {
       // Envia título, autor, e pega doador/chave do usuário logado
       await axios.post("http://localhost:3001/livros", {
         ...form,
-        doador: usuario.nome,
+        doador: usuario.email,
         chaveStellar: usuario.chaveStellar,
       });
       navigate("/"); // volta para a lista
