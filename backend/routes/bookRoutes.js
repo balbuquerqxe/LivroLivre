@@ -26,5 +26,21 @@ router.get('/', listarLivros);
 // Quando for adotar um livro pelo ID (POST)
 router.post('/:id/adotar', adotarLivro);    
 
+// Lista livros doados por um usuário específico
+router.get('/meus-doacoes/:chaveStellar', (req, res) => {
+    const { chaveStellar } = req.params;
+    const livros = require('../data/livros'); // ou de onde você armazena
+    const doados = livros.filter(l => l.chaveStellar === chaveStellar);
+    res.json(doados);
+});
+
+// Lista livros adotados por um usuário específico
+router.get('/meus-adotados/:nome', (req, res) => {
+    const { nome } = req.params;
+    const livros = require('../data/livros'); // ou de onde você armazena
+    const adotados = livros.filter(l => l.adotadoPor === nome);
+    res.json(adotados);
+});
+
 // Exporta o router para ser usado em outros arquivos
 module.exports = router;
