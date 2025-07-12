@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import ListaLivros from './pages/ListaLivros';
 import CadastroLivro from './pages/CadastroLivro';
+import CadastroUsuario from './pages/CadastroUsuario';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<ListaLivros />} />
         <Route path="/cadastro" element={<CadastroLivro />} />
+        <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
       </Routes>
     </div>
   );
