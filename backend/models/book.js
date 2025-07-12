@@ -29,3 +29,10 @@ function criarLivro(titulo, autor, doador, chaveStellar) {
 function listarLivrosDisponiveis() {
   return livros.filter(livro => livro.adotadoPor === null);
 }
+
+// Busca um livro pelo ID
+function buscarLivroPorId(id) {
+  return livros.find(livro => livro.id === parseInt(id));
+}
+
+
