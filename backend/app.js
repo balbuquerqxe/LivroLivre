@@ -16,12 +16,16 @@ app.use(cors());
 // Middleware para analisar o corpo das requisições como JSON
 app.use(express.json());
 
+// Importa as rotas de livros
+const bookRoutes = require('./routes/bookRoutes');
+
+// Usa as rotas de livros no caminho '/livros'
+app.use('/livros', bookRoutes);
+
 // Rota de teste simples (ver se está funcionando)
 app.get('/', (req, res) => {
   res.send('Servidor LivroLivre rodando! EBAAAA!');
 });
-
-// IMPLEMENTAÇÕES FUTURAR!
 
 // Define a "porta" em que o servidor irá rodar
 const PORT = process.env.PORT || 3001;
