@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // Importa as funções do controller de usuários
-const { criarUsuario, autenticarUsuario } = require('../models/user');
+const { criarUsuario, autenticarUsuario, consultarCreditos } = require('../models/user');
 
 // Importa os serviços Stellar para gerar chaves, fundear conta e criar trustlines
 const {
@@ -48,6 +48,12 @@ router.post('/login', (req, res) => {
     }
 
     res.json({ mensagem: 'Login bem-sucedido', usuario });
+});
+
+router.get('/creditos/:email', (req, res) => {
+  const { email } = req.params;
+  const creditos = consultarCreditos(email);
+  res.json({ creditos });
 });
 
 // Exporta o router para ser usado em outros arquivos

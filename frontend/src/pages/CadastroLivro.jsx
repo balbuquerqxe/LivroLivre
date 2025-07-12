@@ -6,7 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 export default function CadastroLivro() {
   const navigate = useNavigate();
-  const { usuario } = useAuth();
+  const { usuario, atualizarCreditos } = useAuth(); // ← agora inclui a função
 
   const [form, setForm] = useState({
     titulo: "",
@@ -29,6 +29,10 @@ export default function CadastroLivro() {
         doador: usuario.email,
         chaveStellar: usuario.chaveStellar,
       });
+
+      // ✅ Atualiza os créditos após a doação
+      await atualizarCreditos(usuario.email);
+
       navigate("/"); // volta para a lista
     } catch (err) {
       setErro("Erro ao cadastrar. Verifique os dados.");

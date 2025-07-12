@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [usuario, setUsuario]   = useState(null);
+  const [usuario, setUsuario] = useState(null);
   const [carregando, setLoading] = useState(true);   // ← novo
 
   // Carrega o usuário salvo (se houver) e depois marca “pronto”
@@ -23,11 +23,25 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('usuario');
   }
 
+  async function atualizarCreditos(email) {
+    try {
+      const res = await fetch(`http://localhost:3001/usuarios/creditos/${email}`);
+      const { creditos } = await res.json();
+
+      const atualizado = { ...usuario, creditos };
+      setUsuario(atualizado);
+      localStorage.setItem('usuario', JSON.stringify(atualizado));
+    } catch (err) {
+      console.error('Erro ao consultar créditos:', err);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ usuario, login, logout, carregando }}>
+    <AuthContext.Provider value={{ usuario, login, logout, carregando, atualizarCreditos }}>
       {children}
     </AuthContext.Provider>
   );
+
 }
 
 export const useAuth = () => useContext(AuthContext);

@@ -1,10 +1,10 @@
 import { Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import ListaLivros      from './pages/ListaLivros';
-import CadastroLivro    from './pages/CadastroLivro';
-import CadastroUsuario  from './pages/CadastroUsuario';
-import Login            from './pages/LoginUsuario';
-import MeusLivros       from './pages/MeusLivros';
+import ListaLivros from './pages/ListaLivros';
+import CadastroLivro from './pages/CadastroLivro';
+import CadastroUsuario from './pages/CadastroUsuario';
+import Login from './pages/LoginUsuario';
+import MeusLivros from './pages/MeusLivros';
 
 export default function App() {
   const { usuario, logout, carregando } = useAuth();
@@ -16,15 +16,16 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       {usuario && (
-        <nav className="mb-4 flex gap-4 items-center">
-          <Link to="/"            className="text-blue-600 font-semibold">Livros</Link>
-          <Link to="/cadastro"    className="text-blue-600 font-semibold">Cadastrar Livro</Link>
-          <Link to="/meus-livros" className="text-blue-600 font-semibold">Meus Livros</Link>
+        <nav className="mb-4 flex items-center gap-4">
+          <Link to="/">Livros</Link>
+          <Link to="/cadastro">Cadastrar Livro</Link>
+          <Link to="/meus-livros">Meus Livros</Link>
 
-          <button
-            onClick={() => { logout(); navigate('/login'); }}
-            className="text-red-600 font-semibold ml-auto"
-          >
+          <span className="ml-auto font-semibold text-gray-800">
+            {usuario.nome} — Créditos: {usuario.creditos ?? 0}
+          </span>
+
+          <button onClick={() => { logout(); navigate('/login'); }}>
             Logout
           </button>
         </nav>
@@ -32,13 +33,13 @@ export default function App() {
 
       <Routes>
         {/* Rotas públicas */}
-        <Route path="/login"            element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
 
         {/* Rotas privadas */}
-        <Route path="/"          element={usuario ? <ListaLivros />   : <Navigate to="/login" />} />
-        <Route path="/cadastro"  element={usuario ? <CadastroLivro /> : <Navigate to="/login" />} />
-        <Route path="/meus-livros" element={usuario ? <MeusLivros />  : <Navigate to="/login" />} />
+        <Route path="/" element={usuario ? <ListaLivros /> : <Navigate to="/login" />} />
+        <Route path="/cadastro" element={usuario ? <CadastroLivro /> : <Navigate to="/login" />} />
+        <Route path="/meus-livros" element={usuario ? <MeusLivros /> : <Navigate to="/login" />} />
 
         {/* Qualquer outra URL → login */}
         <Route path="*" element={<Navigate to="/login" />} />

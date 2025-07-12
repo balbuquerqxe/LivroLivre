@@ -8,7 +8,7 @@ export default function ListaLivros() {
   const [modalAberto, setModalAberto] = useState(false);
   const [livroSelecionado, setLivroSelecionado] = useState(null);
 
-  const { usuario } = useAuth();
+  const { usuario, atualizarCreditos } = useAuth();  // ⬅️ importa a função
 
   // Carrega todos os livros ao abrir a tela
   useEffect(() => {
@@ -30,8 +30,6 @@ export default function ListaLivros() {
         { adotante: usuario.email }
       );
 
-      console.log('Resposta da adoção:', res);
-
       if (!res.data.livro) {
         alert('Erro: resposta inválida do servidor.');
         return;
@@ -41,6 +39,10 @@ export default function ListaLivros() {
       setLivros(prev =>
         prev.map(l => (l.id === livroAtualizado.id ? livroAtualizado : l))
       );
+
+      // ⬇️ Atualiza créditos do usuário
+      await atualizarCreditos(usuario.email);
+
       setModalAberto(false);
     } catch (err) {
       console.error('Erro ao adotar livro:', err);
