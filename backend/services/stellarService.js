@@ -95,9 +95,23 @@ async function criarTrustline(secret) {
   await server.submitTransaction(tx);
 }
 
+// Função para fundear a conta do usuário com 100 lumens
+async function fundearConta(publicKey) {
+  const url = `https://friendbot.stellar.org?addr=${publicKey}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("Conta fundeada com sucesso:", data);
+  } catch (err) {
+    console.error("Erro ao fundear conta:", err);
+    throw err;
+  }
+}
+
 // Para poder ser usado em outros arquivos
 module.exports = {
   sendBookToken,
   gerarChavesStellar,
-  criarTrustline
+  criarTrustline,
+  fundearConta
 };
