@@ -3,12 +3,14 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [usuario, setUsuario] = useState(null);
+  const [usuario, setUsuario]   = useState(null);
+  const [carregando, setLoading] = useState(true);   // ← novo
 
-  /* ao abrir a aplicação, tenta carregar do localStorage  */
+  // Carrega o usuário salvo (se houver) e depois marca “pronto”
   useEffect(() => {
     const salvo = localStorage.getItem('usuario');
     if (salvo) setUsuario(JSON.parse(salvo));
+    setLoading(false);             // ← avisa que terminou de ler o storage
   }, []);
 
   function login(dadosUsuario) {
@@ -22,7 +24,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout }}>
+    <AuthContext.Provider value={{ usuario, login, logout, carregando }}>
       {children}
     </AuthContext.Provider>
   );
