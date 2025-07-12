@@ -16,3 +16,8 @@ function criarUsuario(nome, email, senha, chaveStellar) {
     // Retorna o novo usuário criado
     return novoUsuario;
 }
+
+// Função que busca um usuário pelo email
+function buscarUsuarioPorEmail(email) {
+    return usuarios.find(u => u.email === email);
+}
