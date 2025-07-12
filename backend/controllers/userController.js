@@ -1,37 +1,54 @@
-// Importa o serviço Stellar para gerar chaves e criar trustlines
-const { gerarChaveStellar, criarTrustline } = require('../services/stellarService');
+// ===============================
+// CONTROLLER DE USUÁRIO
+// ===============================
+const {
+  criarUsuario,
+  buscarUsuarioPorEmail,
+  usuarios // exportado do models/user.js
+} = require('../models/user');
 
-// Lista dos usuários cadastrados
-const usuarios = [];
+const {
+  gerarChaveStellar,
+  criarTrustline
+} = require('../services/stellarService');
 
-// Função que cria um novo usuário
+// Cadastro de novo usuário
 async function cadastrarUsuario(req, res) {
-  const { nome } = req.body;
+  const { nome, email, senha } = req.body;
+  if (!nome || !email || !senha)
+    return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
 
   try {
-    // Gera uma chave Stellar
+    // 1. Gera chave Stellar e trustline
     const { chavePublica, chaveSecreta } = await gerarChaveStellar();
-
-    // Cria trustline para o token BOOK
     await criarTrustline(chaveSecreta);
 
-    // Armazena o usuário!
-    const usuario = { nome, chavePublica, chaveSecreta };
-    usuarios.push(usuario);
+    // 2. Cria e registra usuário com créditos iniciados em 0
+    const novo = criarUsuario(nome, email, senha, chavePublica); // já inicia com 0 créditos
 
-    // Retorna os dados relevantes (sem mostrar a chave secreta)
-    res.status(201).json({ nome, chavePublica });
-  } catch (error) {
-    console.error('Erro ao cadastrar usuário:', error);
-    res.status(500).json({ erro: 'Erro ao cadastrar usuário' });
+    // 3. Retorna sem a chave secreta
+    res.status(201).json({
+      id: novo.id,
+      nome: novo.nome,
+      email: novo.email,
+      chavePublica: novo.chaveStellar,
+      creditos: novo.creditos
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao cadastrar usuário.' });
   }
 }
 
-// Função que lista os usuários
+// Lista simples de usuários
 function listarUsuarios(req, res) {
-  const lista = usuarios.map(({ nome, chavePublica }) => ({ nome, chavePublica }));
+  const lista = usuarios.map(u => ({
+    id: u.id,
+    nome: u.nome,
+    email: u.email,
+    creditos: u.creditos
+  }));
   res.json(lista);
 }
 
-// Exporta as funções para serem usadas em outros arquivos
 module.exports = { cadastrarUsuario, listarUsuarios };

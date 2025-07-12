@@ -1,17 +1,31 @@
-// Importa as funções relacionadas ao livro
+// controllers/bookController.js
+// ---------------------------------------------------------
+//  CONTROLLER DE LIVROS – com sistema de créditos ✔️
+// ---------------------------------------------------------
+
+// --- MODELO DE LIVROS ---
 const {
   criarLivro,
   listarLivrosDisponiveis,
-  buscarLivroPorId
+  buscarLivroPorId,
+  getLivros                     // devolve toda a lista em memória
 } = require('../models/book');
 
-// Importa a função que envia o token Stellar
+// --- MODELO DE USUÁRIOS (com créditos) ---
+const {
+  buscarUsuarioPorEmail,
+  adicionarCredito,             // +1 crédito
+  usarCredito,                  // -1 crédito (true|false)
+  consultarCreditos             // saldo numérico
+} = require('../models/user');
+
+// --- SERVIÇO STELLAR ---
 const { sendBookToken } = require('../services/stellarService');
 
-// Importa a lista de livros (em memória, do módulo que os armazena)
-const livros = require('../models/book').getLivros?.() || []; // fallback caso getLivros não exista
 
-// Função para cadastrar livro
+// ---------------------------------------------------------
+// 1. Cadastrar Livro  ➜  +1 crédito ao doador
+// ---------------------------------------------------------
 function cadastrarLivro(req, res) {
   const { titulo, autor, doador, chaveStellar } = req.body;
 
@@ -19,79 +33,103 @@ function cadastrarLivro(req, res) {
     return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
   }
 
+  /* garante que o doador já esteja registrado
+     (caso use outro endpoint de cadastro, isso nunca roda) */
+  const user = buscarUsuarioPorEmail(doador);
+  if (!user) {
+    return res.status(400).json({ erro: `O doador ${doador} não está cadastrado. Faça o login ou cadastro antes de doar um livro.` });
+  }
+
+
+  // cria o livro
   const novoLivro = criarLivro(titulo, autor, doador, chaveStellar);
-  res.status(201).json(novoLivro);
+
+  // credita o doador
+  adicionarCredito(doador);
+
+  return res.status(201).json(novoLivro);
 }
 
-// Função para listar livros disponíveis
-function listarLivros(req, res) {
-  const livros = listarLivrosDisponiveis();
-  res.json(livros);
+
+// ---------------------------------------------------------
+// 2. Listar Livros Disponíveis
+// ---------------------------------------------------------
+function listarLivros(_req, res) {
+  try {
+    return res.json(listarLivrosDisponiveis());
+  } catch (err) {
+    console.error('Erro ao listar livros:', err);
+    return res.status(500).json({ erro: 'Erro interno ao listar livros.' });
+  }
 }
 
-// Função para adotar um livro
+
+// ---------------------------------------------------------
+// 3. Adotar Livro  ➜  -1 crédito do adotante
+// ---------------------------------------------------------
 async function adotarLivro(req, res) {
   const { id } = req.params;
-  const { adotante } = req.body;
+  const { adotante } = req.body;   // e-mail do usuário logado
+  console.log(`[DEBUG] Tentando adotar: ${adotante}`);
 
-  if (!adotante) {
-    return res.status(400).json({ erro: 'Nome do adotante é obrigatório.' });
-  }
+  if (!adotante)
+    return res.status(400).json({ erro: 'Adotante é obrigatório.' });
 
   const livro = buscarLivroPorId(id);
-
-  if (!livro) {
-    return res.status(404).json({ erro: 'Livro não encontrado.' });
-  }
-
-  if (livro.adotadoPor) {
+  if (!livro) return res.status(404).json({ erro: 'Livro não encontrado.' });
+  if (livro.adotadoPor)
     return res.status(400).json({ erro: 'Livro já foi adotado.' });
+
+  console.log(`[DEBUG] Créditos do adotante (${adotante}): ${consultarCreditos(adotante)}`);
+  // tenta descontar crédito
+  if (!usarCredito(adotante)) {
+    return res.status(403).json({ erro: 'Você não possui créditos suficientes para adotar um livro.' });
   }
 
   try {
-    // Faz a transação de envio de token para o doador
-    const resultado = await sendBookToken(livro.chaveStellar);
+    // envia 1 token BOOK ao doador
+    const { hash } = await sendBookToken(livro.chaveStellar);
 
+    // atualiza estado do livro
     livro.adotadoPor = adotante;
-    livro.hashTransacao = resultado.hash;
-
+    livro.hashTransacao = hash;
     livro.historico.push({
       doador: livro.doador,
       adotante,
-      hash: resultado.hash,
+      hash,
       data: new Date().toISOString()
     });
 
-    res.json({ mensagem: 'Livro adotado e token enviado!', livro });
-  } catch (erro) {
-    if (erro.response?.data?.extras?.hash) {
-      console.log("Hash da transação (mesmo com erro):", erro.response.data.extras.hash);
-    } else if (erro.response?.data?.extras) {
-      console.log("Extras completos:", JSON.stringify(erro.response.data.extras, null, 2));
-    } else {
-      console.error("Erro ao enviar token via Stellar:", erro.message || erro);
-    }
+    return res.json({ mensagem: 'Livro adotado e token enviado!', livro });
 
-    res.status(500).json({ erro: 'Erro ao enviar token via Stellar.' });
+  } catch (err) {
+    // falhou: devolve o crédito
+    adicionarCredito(adotante);
+    console.error('Falha ao enviar token:', err.message || err);
+    return res.status(500).json({ erro: 'Erro ao processar adoção do livro.' });
   }
 }
 
-// Função para listar os livros doados e adotados por um usuário (baseado no e-mail)
+
+// ---------------------------------------------------------
+// 4. Livros (e saldo) de um Usuário
+// ---------------------------------------------------------
 function listarLivrosDoUsuario(req, res) {
-  const email = req.params.email;
+  const { email } = req.params;
+  if (!email) return res.status(400).json({ erro: 'E-mail é obrigatório.' });
 
-  if (!email) {
-    return res.status(400).json({ erro: 'E-mail é obrigatório.' });
-  }
+  const todos = getLivros();
+  const doados = todos.filter(l => l.doador === email);
+  const adotados = todos.filter(l => l.adotadoPor === email);
+  const creditos = consultarCreditos(email);   // 0 se não existir
 
-  // Filtra pela chaveStellar no caso dos doados, e pelo nome para adotados
-  const doados = livros.filter(l => l.doador === email || l.chaveStellar === email);
-  const adotados = livros.filter(l => l.adotadoPor === email);
-
-  res.json({ doados, adotados });
+  return res.json({ creditos, doados, adotados });
 }
 
-// Exporta as funções do controller
+
+// ---------------------------------------------------------
+// EXPORTAÇÕES
+// ---------------------------------------------------------
 module.exports = {
   cadastrarLivro,
   listarLivros,

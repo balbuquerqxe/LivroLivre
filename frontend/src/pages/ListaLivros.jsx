@@ -19,10 +19,23 @@ export default function ListaLivros() {
 
   // Chamada quando o usuário confirma a adoção
   const handleAdocaoConfirmada = async () => {
+    if (!usuario?.nome) {
+      alert('Você precisa estar logado para adotar um livro.');
+      return;
+    }
+
     try {
-      const res = await axios.post(`http://localhost:3001/livros/${livroSelecionado.id}/adotar`, {
-        adotante: usuario.nome
-      });
+      const res = await axios.post(
+        `http://localhost:3001/livros/${livroSelecionado.id}/adotar`,
+        { adotante: usuario.email }
+      );
+
+      console.log('Resposta da adoção:', res);
+
+      if (!res.data.livro) {
+        alert('Erro: resposta inválida do servidor.');
+        return;
+      }
 
       const livroAtualizado = res.data.livro;
       setLivros(prev =>
@@ -31,7 +44,8 @@ export default function ListaLivros() {
       setModalAberto(false);
     } catch (err) {
       console.error('Erro ao adotar livro:', err);
-      alert('Erro ao adotar livro.');
+      const erroMsg = err.response?.data?.erro || 'Erro ao adotar livro.';
+      alert(erroMsg);
     }
   };
 

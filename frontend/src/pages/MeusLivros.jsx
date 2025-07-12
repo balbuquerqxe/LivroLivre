@@ -14,7 +14,7 @@ export default function MeusLivros() {
             .then(res => setLivrosDoados(res.data))
             .catch(err => console.error('Erro ao buscar livros doados:', err));
 
-        axios.get(`http://localhost:3001/livros/meus-adotados/${usuario.nome}`)
+        axios.get(`http://localhost:3001/livros/meus-adotados/${usuario.email}`)
             .then(res => setLivrosAdotados(res.data))
             .catch(err => console.error('Erro ao buscar livros adotados:', err));
     }, [usuario]);
