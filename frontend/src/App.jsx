@@ -9,6 +9,7 @@ export default function App() {
       <nav className="mb-4 flex gap-4">
         <Link to="/" className="text-blue-600 font-semibold">Livros</Link>
         <Link to="/cadastro" className="text-blue-600 font-semibold">Cadastrar Livro</Link>
+        <Link to="/cadastro-usuario" className="text-blue-600 font-semibold">Cadastrar Usuário</Link>
       </nav>
 
       <Routes>
