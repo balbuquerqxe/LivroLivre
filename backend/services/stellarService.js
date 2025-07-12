@@ -1,21 +1,15 @@
-// Importar biblioteca da Stellar
+// Importa toda a biblioteca Stellar de forma clássica
 const StellarSdk = require('stellar-sdk');
-const { getServer } = require('stellar-sdk');
-
-// Carrega o arquivo .env! Tem as informações sensíveis!!
 require('dotenv').config();
 
-// Conexão com o servidor da Stellar Testnet
-const { getServer } = require('stellar-sdk');
-const server = getServer('TESTNET');
+// Conecta com a testnet da Stellar
+const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
 
-// Criação de um par de chaves para o emissor do token
+// Chaves do emissor do token
 const issuingKeypair = StellarSdk.Keypair.fromSecret(process.env.STELLAR_SECRET);
-
-// Obtém a chave pública do emissor
 const issuingPublicKey = issuingKeypair.publicKey();
 
-// Criação do token que será enviado, sendo o nome do token "BOOK"
+// Define o ativo/tóken que será enviado
 const asset = new StellarSdk.Asset('BOOK', issuingPublicKey);
 
 // Função que envia o token para o usuário!

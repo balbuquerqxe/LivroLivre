@@ -8,6 +8,19 @@ const {
 // Importa a função que envia o token Stellar
 const { sendBookToken } = require('../services/stellarService');
 
+// Função para cadastrar livro
+function cadastrarLivro(req, res) {
+    const { titulo, autor, doador, chaveStellar } = req.body;
+    const novoLivro = criarLivro(titulo, autor, doador, chaveStellar);
+    res.status(201).json(novoLivro);
+}
+
+// Função para listar livros disponíveis
+function listarLivros(req, res) {
+    const livros = listarLivrosDisponiveis();
+    res.json(livros);
+}
+
 // Função para adotar um livro
 async function adotarLivro(req, resposta) {
     // Obtém o ID da rota
