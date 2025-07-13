@@ -4,7 +4,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Define o nome do arquivo do banco de dados. Este arquivo será criado na mesma pasta.
-const DB_FILE = './meu_banco_de_dados.db'; 
+const DB_FILE = './meu_banco_de_dados.db';
 
 // Cria ou conecta ao banco de dados SQLite.
 // O callback é executado assim que a tentativa de conexão é feita.
@@ -47,20 +47,21 @@ function createTablesAndPopulate() {
     // adotadoPor: Email do adotante (nulo se disponível).
     // historico: Guardado como texto JSON.
     const createLivrosTableSql = `
-        CREATE TABLE IF NOT EXISTS livros (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            titulo TEXT NOT NULL,
-            autor TEXT NOT NULL,
-            doador TEXT NOT NULL,              -- Email do doador
-            chaveStellarDoador TEXT,           -- Chave pública Stellar do doador
-            adotadoPor TEXT,                   -- Email do adotante (NULL se disponível)
-            hashTransacao TEXT,                -- Hash da transação Stellar de adoção
-            historico TEXT                     -- JSON string do histórico de transações
-        );
-    `;
+    CREATE TABLE IF NOT EXISTS livros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        doador TEXT NOT NULL,
+        chaveStellarDoador TEXT,
+        adotadoPor TEXT,
+        hashTransacao TEXT,
+        historico TEXT,
+        imagem TEXT   -- Novo campo para armazenar o caminho da foto
+    );
+`;
 
     // db.serialize() garante que as operações SQL sejam executadas em sequência.
-    db.serialize(() => { 
+    db.serialize(() => {
         // 1. Executa a criação da tabela 'usuarios'.
         db.run(createUsersTableSql, (err) => {
             if (err) {
@@ -129,15 +130,16 @@ function insertInitialBooks() {
     ];
 
     const insertBookSql = `
-        INSERT OR IGNORE INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
-    `;
+    INSERT OR IGNORE INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico, imagem)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+`;
+
 
     db.serialize(() => {
         initialBooks.forEach(book => {
             // Para 'historico', salvamos um array vazio convertido para string JSON.
             db.run(insertBookSql,
-                [book.titulo, book.autor, book.doador, book.chaveStellarDoador, null, null, JSON.stringify([])], 
+                [book.titulo, book.autor, book.doador, book.chaveStellarDoador, null, null, JSON.stringify([]), 'uploads/capa_padrao.png'],
                 function (err) {
                     if (err) {
                         console.error(`[DATABASE ERROR] Erro ao inserir livro inicial "${book.titulo}": ${err.message}`);

@@ -1,6 +1,21 @@
 // LivroLivre/backend/routes/bookRoutes.js
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+
+// Configuração do destino e nome do arquivo
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);  // Ex: 1720978629182.jpg
+  }
+});
+
+const upload = multer({ storage });
 
 // Importa as funções do controller de livros
 const {
@@ -24,7 +39,7 @@ const {
 // Esta rota espera 'doador' e 'chaveStellar' no req.body vindo do frontend.
 // Se você quiser que o backend extraia de req.user, precisaria de um middleware
 // router.post('/', authMiddleware, cadastrarLivro); // Exemplo com middleware
-router.post('/', cadastrarLivro); 
+router.post('/', upload.single('imagem'), cadastrarLivro);
 
 // Quando for listar os livros disponíveis (GET /api/livros)
 router.get('/', listarLivros);     

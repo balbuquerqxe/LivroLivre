@@ -3,16 +3,16 @@
 const db = require('../database'); // Importa a conexão com o banco de dados
 
 // Função que cria um novo livro
-function criarLivro(titulo, autor, doador, chaveStellarDoador) { 
+function criarLivro(titulo, autor, doador, chaveStellarDoador, imagem) {
     const sql = `
-        INSERT INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico, imagem)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `;
     
     const historicoJson = JSON.stringify([]); 
 
     return new Promise((resolve, reject) => {
-        db.run(sql, [titulo, autor, doador, chaveStellarDoador, null, null, historicoJson], function(err) {
+        db.run(sql, [titulo, autor, doador, chaveStellarDoador, null, null, historicoJson, imagem], function(err) {
             if (err) {
                 console.error(`[MODEL-LIVRO] Erro ao criar livro: ${err.message}`);
                 reject(err);
@@ -25,7 +25,8 @@ function criarLivro(titulo, autor, doador, chaveStellarDoador) {
                     chaveStellarDoador, 
                     adotadoPor: null,
                     hashTransacao: null,
-                    historico: [] 
+                    historico: [],
+                    imagem
                 };
                 console.log('[DEBUG-MODEL-LIVRO] Livro cadastrado:', novoLivro.titulo, '(ID:', novoLivro.id, ')');
                 resolve(novoLivro);
