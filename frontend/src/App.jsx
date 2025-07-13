@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import { Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
@@ -6,7 +8,9 @@ import CadastroLivro from './pages/CadastroLivro';
 import CadastroUsuario from './pages/CadastroUsuario';
 import Login from './pages/LoginUsuario';
 import MeusLivros from './pages/MeusLivros';
-import TelaInicial from './pages/TelaInicial'; // mantém a tela pública
+import TelaInicial from './pages/TelaInicial';
+import MeusChats from './pages/meusChats';
+import ChatDetalhado from './pages/ChatDetalhado'; // ✅ novo import
 
 export default function App() {
   const { usuario, logout, carregando } = useAuth();
@@ -21,6 +25,7 @@ export default function App() {
           <Link to="/">Livros</Link>
           <Link to="/cadastro">Cadastrar Livro</Link>
           <Link to="/meus-livros">Meus Livros</Link>
+          <Link to="/meus-chats">Meus Chats</Link>
 
           <span className="ml-auto font-semibold text-gray-800">
             {usuario.nome} — Créditos: {usuario.creditos ?? 0}
@@ -40,10 +45,12 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
 
-        {/* Rota principal agora abre direto a lista */}
+        {/* Rotas privadas */}
         <Route path="/" element={usuario ? <ListaLivros /> : <Navigate to="/inicio" />} />
         <Route path="/cadastro" element={usuario ? <CadastroLivro /> : <Navigate to="/inicio" />} />
         <Route path="/meus-livros" element={usuario ? <MeusLivros /> : <Navigate to="/inicio" />} />
+        <Route path="/meus-chats" element={usuario ? <MeusChats /> : <Navigate to="/inicio" />} />
+        <Route path="/chat/:chatId" element={usuario ? <ChatDetalhado /> : <Navigate to="/inicio" />} /> {/* ✅ nova rota */}
 
         {/* Qualquer outra URL → /inicio */}
         <Route path="*" element={<Navigate to="/inicio" />} />

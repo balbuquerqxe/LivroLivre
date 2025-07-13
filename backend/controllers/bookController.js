@@ -3,6 +3,8 @@
 //  CONTROLLER DE LIVROS – com sistema de créditos ✔️ (ADAPTADO PARA DB)
 // ---------------------------------------------------------
 
+const { criarChat } = require('../models/chatModel'); // Novo model de chats
+
 // --- MODELO DE LIVROS ---
 const {
   criarLivro,
@@ -132,7 +134,10 @@ async function adotarLivro(req, res) {
       throw new Error("Falha ao atualizar o status do livro no banco de dados após a transação.");
     }
 
-    return res.json({ mensagem: 'Livro adotado e token enviado!', livro: livroAtualizado });
+    // Cria automaticamente o chat entre doador e adotante
+    await criarChat(livro.id, livro.doador, adotante);
+
+    return res.json({ mensagem: 'Livro adotado, token enviado e chat criado!', livro: livroAtualizado });
 
   } catch (err) {
     await adicionarCredito(adotante);

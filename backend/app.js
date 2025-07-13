@@ -3,6 +3,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path'); // 🆕 necessário para servir arquivos estáticos
+const chatRoutes = require('./routes/chatRoutes');
+
 require('dotenv').config();
 
 require('./database');
@@ -36,6 +38,7 @@ const bookRoutes = require('./routes/bookRoutes');
 
 app.use('/api/usuarios', userRoutes); 
 app.use('/api/livros', bookRoutes); 
+app.use('/api/chats', chatRoutes);
 
 // Rota teste
 app.get('/', (req, res) => {

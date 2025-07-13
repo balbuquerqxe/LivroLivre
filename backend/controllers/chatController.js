@@ -1,94 +1,59 @@
-// controllers/chatController.js
+// backend/routes/chatRoutes.js
+const express = require('express');
+const router = express.Router();
+const chat = require('../models/chatModel');
 
-// Lista em memória com todos os chats
-const chats = [];
-
-// Cria um novo chat (ou retorna um existente)
-function abrirChat(req, res) {
+/* abrir ou obter (POST) */
+router.post('/', async (req, res) => {
   const { livroId, titulo, doadorEmail, adotanteEmail } = req.body;
+  if (!livroId || !doadorEmail || !adotanteEmail)
+    return res.status(400).json({ erro: 'Campos obrigatórios faltando' });
 
-  // Verifica se todos os dados foram enviados
-  if (!livroId || !titulo || !doadorEmail || !adotanteEmail) {
-    return res.status(400).json({ erro: 'Campos obrigatórios faltando.' });
-  }
+  try {
+    // procura se já existe um chat para esse livro
+    const existente = await chat.listarChatsDoUsuario(doadorEmail)
+      .then(arr => arr.find(c => c.livroId === livroId));
+    if (existente) return res.json(existente);
 
-  // Impede duplicação: se já existir um chat com esse livro, retorna o mesmo
-  const existente = chats.find(c => c.livroId === livroId);
-  if (existente) {
-    return res.status(200).json({ mensagem: 'Chat já existe.', chat: existente });
-  }
+    const novo = await chat.criarChat(livroId, titulo, doadorEmail, adotanteEmail);
+    res.status(201).json(novo);
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 
-  const novoChat = {
-    id: chats.length + 1,
-    livroId,
-    titulo,
-    doadorEmail,
-    adotanteEmail,
-    mensagens: [],
-    resolvido: false
-  };
+/* listar chats do usuário */
+router.get('/:email', async (req, res) => {
+  try {
+    const dados = await chat.listarChatsDoUsuario(req.params.email);
+    res.json(dados);
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 
-  chats.push(novoChat);
-  res.status(201).json(novoChat);
-}
+/* buscar chat por id */
+router.get('/id/:id', async (req, res) => {
+  try {
+    const c = await chat.buscarChatPorId(req.params.id);
+    if (!c) return res.status(404).json({ erro: 'Chat não encontrado' });
+    res.json(c);
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 
-// Lista os chats ativos de um usuário (como doador ou adotante)
-function listarChatsPorUsuario(req, res) {
-  const { email } = req.params;
+/* enviar mensagem */
+router.post('/:id/mensagem', async (req, res) => {
+  const { remetente, texto } = req.body;
+  if (!remetente || !texto) return res.status(400).json({ erro: 'remetente e texto obrigatórios' });
+  try {
+    const atualizado = await chat.enviarMensagem(req.params.id, remetente, texto);
+    res.json(atualizado);
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 
-  if (!email) {
-    return res.status(400).json({ erro: 'E-mail é obrigatório.' });
-  }
+/* encerrar chat */
+router.delete('/:id', async (req, res) => {
+  try {
+    const ok = await chat.encerrarChat(req.params.id);
+    if (!ok) return res.status(404).json({ erro: 'Chat não encontrado' });
+    res.json({ mensagem: 'Chat encerrado' });
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 
-  // Retorna apenas os chats ainda não resolvidos
-  const relacionados = chats.filter(
-    c => !c.resolvido && (c.doadorEmail === email || c.adotanteEmail === email)
-  );
-
-  res.json(relacionados);
-}
-
-// Envia uma nova mensagem em um chat existente
-function enviarMensagem(req, res) {
-  const { id } = req.params;
-  const { autor, texto } = req.body;
-
-  if (!autor || !texto) {
-    return res.status(400).json({ erro: 'Autor e texto são obrigatórios.' });
-  }
-
-  const chat = chats.find(c => c.id === parseInt(id));
-
-  if (!chat) {
-    return res.status(404).json({ erro: 'Chat não encontrado.' });
-  }
-
-  chat.mensagens.push({
-    autor,
-    texto,
-    data: new Date().toISOString()
-  });
-
-  res.status(200).json({ sucesso: true, chat });
-}
-
-// Encerra (remove) um chat da lista
-function encerrarChat(req, res) {
-  const { id } = req.params;
-
-  const index = chats.findIndex(c => c.id === parseInt(id));
-
-  if (index === -1) {
-    return res.status(404).json({ erro: 'Chat não encontrado.' });
-  }
-
-  chats.splice(index, 1); // Remove definitivamente da memória
-  res.status(200).json({ mensagem: 'Chat encerrado com sucesso.' });
-}
-
-module.exports = {
-  abrirChat,
-  listarChatsPorUsuario,
-  enviarMensagem,
-  encerrarChat
-};
+module.exports = router;

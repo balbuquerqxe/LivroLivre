@@ -1,93 +1,125 @@
-// LivroLivre/backend/database.js
-
-// Importa o módulo sqlite3. O '.verbose()' adiciona mais logs ao console, útil para debug.
 const sqlite3 = require('sqlite3').verbose();
-
-// Define o nome do arquivo do banco de dados. Este arquivo será criado na mesma pasta.
 const DB_FILE = './meu_banco_de_dados.db';
 
-// Cria ou conecta ao banco de dados SQLite.
-// O callback é executado assim que a tentativa de conexão é feita.
 const db = new sqlite3.Database(DB_FILE, (err) => {
     if (err) {
-        // Se houver um erro ao conectar (ex: permissões de arquivo), loga e pode até encerrar o processo.
         console.error(`[DATABASE ERROR] Erro ao conectar ao banco de dados: ${err.message}`);
-        // Em um ambiente de produção, você pode querer sair do processo aqui para evitar mais erros:
-        // process.exit(1); 
     } else {
-        // Conexão bem-sucedida.
         console.log('[DATABASE] Conectado ao banco de dados SQLite.');
-        // Chama a função para criar as tabelas e popular o banco de dados.
         createTablesAndPopulate();
     }
 });
 
-/**
- * Função principal para criar todas as tabelas necessárias no banco de dados
- * e popular com dados iniciais, se elas não existirem.
- */
 function createTablesAndPopulate() {
-    // SQL para criar a tabela 'usuarios'.
-    // id: Chave primária que auto-incrementa.
-    // email: Texto, não pode ser nulo e deve ser único.
     const createUsersTableSql = `
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             senha TEXT NOT NULL,
-            chaveStellar TEXT,          -- Chave pública Stellar do usuário
+            chaveStellar TEXT,
             creditos INTEGER DEFAULT 0
         );
     `;
 
-    // SQL para criar a tabela 'livros'.
-    // id: Chave primária que auto-incrementa.
-    // doador, chaveStellarDoador: Informações do doador.
-    // adotadoPor: Email do adotante (nulo se disponível).
-    // historico: Guardado como texto JSON.
     const createLivrosTableSql = `
-    CREATE TABLE IF NOT EXISTS livros (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo TEXT NOT NULL,
-        autor TEXT NOT NULL,
-        doador TEXT NOT NULL,
-        chaveStellarDoador TEXT,
-        adotadoPor TEXT,
-        hashTransacao TEXT,
-        historico TEXT,
-        imagem TEXT   -- Novo campo para armazenar o caminho da foto
-    );
-`;
+        CREATE TABLE IF NOT EXISTS livros (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            autor TEXT NOT NULL,
+            doador TEXT NOT NULL,
+            chaveStellarDoador TEXT,
+            adotadoPor TEXT,
+            hashTransacao TEXT,
+            historico TEXT,
+            imagem TEXT
+        );
+    `;
 
-    // db.serialize() garante que as operações SQL sejam executadas em sequência.
+    const createChatsTableSql = `
+        CREATE TABLE IF NOT EXISTS chats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            livroId INTEGER NOT NULL,
+            doador TEXT NOT NULL,
+            adotante TEXT NOT NULL,
+            mensagens TEXT DEFAULT '[]',
+            criadoEm DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    `;
+
+    const createMensagensTableSql = `
+        CREATE TABLE IF NOT EXISTS mensagens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chatId INTEGER NOT NULL,
+            remetente TEXT NOT NULL,
+            texto TEXT NOT NULL,
+            enviadoEm DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (chatId) REFERENCES chats(id) ON DELETE CASCADE
+        );
+    `;
+
     db.serialize(() => {
-        // 1. Executa a criação da tabela 'usuarios'.
         db.run(createUsersTableSql, (err) => {
-            if (err) {
-                console.error(`[DATABASE ERROR] Erro ao criar tabela 'usuarios': ${err.message}`);
-            } else {
+            if (err) console.error(`[DATABASE ERROR] Erro ao criar tabela 'usuarios': ${err.message}`);
+            else {
                 console.log('[DATABASE] Tabela "usuarios" criada ou já existe.');
-                insertInitialUsers(); // Chama a função para inserir usuários iniciais.
+                insertInitialUsers();
             }
         });
 
-        // 2. Executa a criação da tabela 'livros'.
         db.run(createLivrosTableSql, (err) => {
-            if (err) {
-                console.error(`[DATABASE ERROR] Erro ao criar tabela 'livros': ${err.message}`);
-            } else {
+            if (err) console.error(`[DATABASE ERROR] Erro ao criar tabela 'livros': ${err.message}`);
+            else {
                 console.log('[DATABASE] Tabela "livros" criada ou já existe.');
-                insertInitialBooks(); // Chama a função para inserir livros iniciais.
+                insertInitialBooks();
+            }
+        });
+
+        db.run(createChatsTableSql, (err) => {
+            if (err) console.error(`[DATABASE ERROR] Erro ao criar tabela 'chats': ${err.message}`);
+            else {
+                console.log('[DATABASE] Tabela "chats" criada ou já existe.');
+                ensureChatHasColumnResolvido();
+            }
+        });
+
+        db.run(createMensagensTableSql, (err) => {
+            if (err) console.error(`[DATABASE ERROR] Erro ao criar tabela 'mensagens': ${err.message}`);
+            else console.log('[DATABASE] Tabela "mensagens" criada ou já existe.');
+        });
+    });
+}
+
+function ensureChatHasColumnResolvido() {
+    db.get("PRAGMA table_info(chats);", (err, row) => {
+        if (err) {
+            console.error("[DATABASE ERROR] Falha ao verificar colunas da tabela 'chats':", err.message);
+            return;
+        }
+
+        db.all("PRAGMA table_info(chats);", (err, columns) => {
+            if (err) {
+                console.error("[DATABASE ERROR] Erro ao listar colunas de 'chats':", err.message);
+                return;
+            }
+
+            const hasResolvido = columns.some(col => col.name === 'resolvido');
+
+            if (!hasResolvido) {
+                db.run(`ALTER TABLE chats ADD COLUMN resolvido BOOLEAN DEFAULT 0;`, (err) => {
+                    if (err) {
+                        console.error("[DATABASE ERROR] Erro ao adicionar coluna 'resolvido':", err.message);
+                    } else {
+                        console.log("[DATABASE] Coluna 'resolvido' adicionada à tabela 'chats'.");
+                    }
+                });
+            } else {
+                console.log("[DATABASE] Coluna 'resolvido' já existe na tabela 'chats'.");
             }
         });
     });
 }
 
-/**
- * Insere um conjunto de usuários iniciais na tabela 'usuarios'.
- * Usa INSERT OR IGNORE para evitar duplicatas em execuções subsequentes.
- */
 function insertInitialUsers() {
     const initialUsers = [
         { nome: "Mariana Costa", email: "mariana@example.com", senha: "senha123", chaveStellar: "GD6ZJ3PQQBX4LGXG4RREXEGFX5QJX6LDN43GGH2VXJWICNBMQBUO7URZ", creditos: 5 },
@@ -95,7 +127,6 @@ function insertInitialUsers() {
         { nome: "Fernanda Almeida", email: "fernanda@example.com", senha: "pass789", chaveStellar: "GAYJBEVFEL33K7WKF2LNYXFYO5RG5SV6H44NFTBBIGSTZNQ54MHH4FDA", creditos: 20 }
     ];
 
-    // SQL para inserir um usuário. 'INSERT OR IGNORE' não faz nada se a linha já existir (com base no UNIQUE email).
     const insertUserSql = `
         INSERT OR IGNORE INTO usuarios (nome, email, senha, chaveStellar, creditos)
         VALUES (?, ?, ?, ?, ?);
@@ -103,10 +134,9 @@ function insertInitialUsers() {
 
     db.serialize(() => {
         initialUsers.forEach(user => {
-            // db.run() executa a instrução SQL. Os '?' são substituídos pelos valores do array.
             db.run(insertUserSql,
                 [user.nome, user.email, user.senha, user.chaveStellar, user.creditos],
-                function (err) { // Usamos 'function' em vez de '=>' para ter acesso ao 'this'
+                function (err) {
                     if (err) {
                         console.error(`[DATABASE ERROR] Erro ao inserir usuário inicial ${user.email}: ${err.message}`);
                     }
@@ -117,11 +147,6 @@ function insertInitialUsers() {
     });
 }
 
-/**
- * Insere um conjunto de livros iniciais na tabela 'livros'.
- * Usa INSERT OR IGNORE (embora a tabela de livros não tenha um campo UNIQUE,
- * é uma boa prática para evitar inserções acidentais em massa).
- */
 function insertInitialBooks() {
     const initialBooks = [
         { titulo: "O Pequeno Príncipe", autor: "Antoine de Saint-Exupéry", doador: "mariana@example.com", chaveStellarDoador: "GD6ZJ3PQQBX4LGXG4RREXEGFX5QJX6LDN43GGH2VXJWICNBMQBUO7URZ" },
@@ -130,14 +155,12 @@ function insertInitialBooks() {
     ];
 
     const insertBookSql = `
-    INSERT OR IGNORE INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico, imagem)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-`;
-
+        INSERT OR IGNORE INTO livros (titulo, autor, doador, chaveStellarDoador, adotadoPor, hashTransacao, historico, imagem)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    `;
 
     db.serialize(() => {
         initialBooks.forEach(book => {
-            // Para 'historico', salvamos um array vazio convertido para string JSON.
             db.run(insertBookSql,
                 [book.titulo, book.autor, book.doador, book.chaveStellarDoador, null, null, JSON.stringify([]), 'uploads/capa_padrao.png'],
                 function (err) {
@@ -151,6 +174,4 @@ function insertInitialBooks() {
     });
 }
 
-// Exporta o objeto 'db'. Outros arquivos (como os modelos) vão usar 'require('./database')'
-// para obter esta instância 'db' e interagir com o banco de dados.
 module.exports = db;
