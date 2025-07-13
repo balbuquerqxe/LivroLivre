@@ -1,58 +1,46 @@
-// Indica quais funções devem ser chamadas quando certos acessos forem feitos
-
-// Importa o express para criar as rotas
+// LivroLivre/backend/routes/bookRoutes.js
 const express = require('express');
-
-// Lida apenas com as rotas relacionadas aos livros
 const router = express.Router();
 
 // Importa as funções do controller de livros
 const {
     cadastrarLivro,
-    listarLivros,
-    adotarLivro
-} = require('../controllers/bookController');
+    listarLivros,        
+    adotarLivro,
+    listarLivrosDoUsuario 
+} = require('../controllers/bookController'); // Caminho para o controller
 
-// OBS: POST é quando queremos enviar dados para criar algo novo
+// --- Middleware de Autenticação (EXEMPLO) ---
+// Você VAI precisar de um middleware de autenticação para as rotas que usam req.user
+// Exemplo:
+// const authMiddleware = require('../middleware/auth'); 
 
-// OBS: GET é quando queremos obter ou ler dados
 
-// Quando for criado um novo livro (POST)
-router.post('/', cadastrarLivro);
+// --------------------------------------------------------------------------
+// Rotas de Livros
+// --------------------------------------------------------------------------
 
-// Quando for listar os livros disponíveis (GET)
+// Quando for criado um novo livro (POST /api/livros)
+// Esta rota espera 'doador' e 'chaveStellar' no req.body vindo do frontend.
+// Se você quiser que o backend extraia de req.user, precisaria de um middleware
+// router.post('/', authMiddleware, cadastrarLivro); // Exemplo com middleware
+router.post('/', cadastrarLivro); 
+
+// Quando for listar os livros disponíveis (GET /api/livros)
 router.get('/', listarLivros);     
 
-// Quando for adotar um livro pelo ID (POST)
+// Quando for adotar um livro pelo ID (POST /api/livros/:id/adotar)
+// Esta rota espera 'adotante' no req.body vindo do frontend.
+// Se você quiser que o backend extraia de req.user, precisaria de um middleware
+// router.post('/:id/adotar', authMiddleware, adotarLivro); // Exemplo com middleware
 router.post('/:id/adotar', adotarLivro);    
 
-// Importa o controller de livros para listar livros do usuário
-const { listarLivrosDoUsuario } = require('../controllers/bookController');
 
-router.get('/usuario/:email', (req, res) => {
-  const { email } = req.params;
-  const livros = require('../data/livros');
+// --------------------------------------------------------------------------
+// Rotas de Livros de um Usuário Específico (GET /api/livros/usuario/:email)
+// --------------------------------------------------------------------------
+// Lista livros doados, adotados e créditos de um usuário específico por email
+router.get('/usuario/:email', listarLivrosDoUsuario);
 
-  const doados = livros.filter(l => l.doador === email);
-  const adotados = livros.filter(l => l.adotadoPor === email);
 
-  res.json({ doados, adotados });
-});
-
-// Rota para listar livros do usuário
-router.get('/meus-doacoes/:chaveStellar', (req, res) => {
-  const { chaveStellar } = req.params;
-  const livros = require('../data/livros');
-  const doados = livros.filter(l => l.chaveStellar === chaveStellar);
-  res.json(doados);
-});
-
-router.get('/meus-adotados/:nome', (req, res) => {
-  const { nome } = req.params;
-  const livros = require('../data/livros');
-  const adotados = livros.filter(l => l.adotadoPor === nome);
-  res.json(adotados);
-});
-
-// Exporta o router para ser usado em outros arquivos
 module.exports = router;

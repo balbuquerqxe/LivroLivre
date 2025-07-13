@@ -15,7 +15,7 @@ export default function CadastroUsuario() {
     e.preventDefault();
 
     try {
-      await axios.post('http://localhost:3001/usuarios/cadastro', {
+      await axios.post('http://localhost:3001/api/usuarios/cadastro', {
         nome,
         email,
         senha,

@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext"; // Caminho corrigido para contexts/AuthContext
 import Wave from "react-wavify";
 import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png';
 
 export default function CadastroLivro() {
   const navigate = useNavigate();
-  const { usuario, atualizarCreditos } = useAuth();
+  // Importa a nova função fetchMeusLivros do contexto
+  const { usuario, atualizarCreditos, fetchMeusLivros } = useAuth(); 
 
   const [form, setForm] = useState({ titulo: "", autor: "" });
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState(""); // Adicionado para feedback de sucesso
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,19 +21,39 @@ export default function CadastroLivro() {
   async function handleSubmit(e) {
     e.preventDefault();
     setErro("");
+    setSucesso(""); // Limpa mensagem de sucesso anterior
+
+    // Validação para garantir que o usuário esteja logado e tenha as chaves
+    if (!usuario || !usuario.email || !usuario.chaveStellar) {
+        setErro("Você precisa estar logado e ter uma chave Stellar associada para cadastrar um livro.");
+        return;
+    }
 
     try {
-      await axios.post("http://localhost:3001/livros", {
+      await axios.post("http://localhost:3001/api/livros", {
         ...form,
         doador: usuario.email,
-        chaveStellar: usuario.chaveStellar,
+        chaveStellar: usuario.chaveStellar, // Passa a chave Stellar do usuário logado
       });
 
-      await atualizarCreditos(usuario.email);
-      navigate("/"); // volta para a tela pós-login
+      // --- AQUI ESTÁ A ATUALIZAÇÃO ---
+      await atualizarCreditos(usuario.email); // Atualiza os créditos
+      await fetchMeusLivros(usuario.email); // <--- CHAMA A NOVA FUNÇÃO PARA ATUALIZAR AS LISTAS DE LIVROS
+      // --- FIM DA ATUALIZAÇÃO ---
+
+      setSucesso("Livro cadastrado com sucesso!"); // Mensagem de sucesso
+      setForm({ titulo: "", autor: "" }); // Limpa o formulário
+      // Opcional: navegar para a página de "Meus Livros" ou lista geral
+      // navigate("/meus-livros"); 
+
     } catch (err) {
+      setSucesso(""); // Limpa mensagem de sucesso em caso de erro
       setErro("Erro ao cadastrar. Verifique os dados.");
-      console.error(err);
+      console.error('Erro ao cadastrar livro:', err);
+      // Se for um erro do backend, tente pegar a mensagem mais específica
+      if (err.response && err.response.data && err.response.data.erro) {
+          setErro(err.response.data.erro);
+      }
     }
   }
 
@@ -53,6 +75,7 @@ export default function CadastroLivro() {
         <h1 className="text-2xl font-bold mb-4 text-green-700">Cadastrar Livro</h1>
 
         {erro && <p className="mb-4 text-red-600">{erro}</p>}
+        {sucesso && <p className="mb-4 text-green-600">{sucesso}</p>} {/* Exibe mensagem de sucesso */}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Título */}
@@ -87,6 +110,13 @@ export default function CadastroLivro() {
           </button>
         </form>
       </div>
+      {/* Botão voltar para a tela pós-login */}
+      <button
+        onClick={() => navigate('/')} // Ajuste para a rota correta da sua tela pós-login
+        className="z-10 mt-6 text-white underline font-semibold hover:text-gray-200"
+      >
+        ← Voltar
+      </button>
     </div>
   );
 }
