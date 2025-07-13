@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Wave from 'react-wavify';
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logobranco.png'; // ajuste o caminho se necessário
 
 export default function LoginUsuario() {
   const { login } = useAuth();
@@ -30,22 +29,19 @@ export default function LoginUsuario() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center text-center bg-white overflow-hidden px-4">
-      {/* Onda verde clara */}
+    <div className="relative min-h-screen flex flex-col justify-center items-center text-center bg-pink-100 overflow-hidden px-4">
+      {/* Onda rosa clara */}
       <Wave
-        fill="#56c27cff"
+        fill="#FFC0CB"
         paused={false}
         options={{ height: 80, amplitude: 100, speed: 0.25, points: 5 }}
         className="absolute bottom-0 left-0 w-full h-[40vh] z-0"
       />
 
-      {/* Logo */}
-      <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
-
       {/* Formulário de login */}
       <form
         onSubmit={handleLogin}
-        className="z-10 bg-green-800 text-white p-6 rounded shadow w-full max-w-md text-left"
+        className="z-10 bg-pink-800 text-white p-6 rounded shadow w-full max-w-md text-left"
       >
         <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
 
@@ -54,7 +50,7 @@ export default function LoginUsuario() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-white bg-green-700 text-white rounded p-2 mb-3 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="w-full border border-white bg-pink-700 text-white rounded p-2 mb-3 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
           required
         />
 
@@ -63,7 +59,7 @@ export default function LoginUsuario() {
           placeholder="Senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          className="w-full border border-white bg-green-700 text-white rounded p-2 mb-3 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+          className="w-full border border-white bg-pink-700 text-white rounded p-2 mb-3 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
           required
         />
 
@@ -73,14 +69,14 @@ export default function LoginUsuario() {
 
         <button
           type="submit"
-          className="w-full bg-white text-green-800 py-2 rounded hover:bg-gray-100 font-semibold"
+          className="w-full bg-white text-pink-800 py-2 rounded hover:bg-gray-100 font-semibold"
         >
           Entrar
         </button>
 
         <Link
           to="/cadastro-usuario"
-          className="block text-center text-white text-sm mt-4 underline hover:text-green-100"
+          className="block text-center text-white text-sm mt-4 underline hover:text-pink-100"
         >
           Criar nova conta
         </Link>
@@ -89,7 +85,7 @@ export default function LoginUsuario() {
       {/* Botão voltar à tela inicial */}
       <button
         onClick={() => navigate('/inicio')}
-        className="z-10 mt-6 text-green-800 underline font-semibold hover:text-green-900"
+        className="z-10 mt-6 text-pink-800 underline font-semibold hover:text-pink-900"
       >
         ← Voltar à tela inicial
       </button>

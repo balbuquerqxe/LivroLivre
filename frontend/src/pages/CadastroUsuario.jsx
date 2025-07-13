@@ -2,7 +2,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Wave from 'react-wavify';
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logobranco.png'; // ajuste o caminho se necessário
 
 export default function CadastroUsuario() {
   const [nome, setNome] = useState('');
@@ -30,20 +29,17 @@ export default function CadastroUsuario() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center text-center bg-white overflow-hidden px-4">
+    <div className="relative min-h-screen flex flex-col justify-center items-center text-center bg-yellow-100 overflow-hidden px-4">
       {/* Onda verde clara */}
       <Wave
-        fill="#56c27cff"
+        fill="#e9cf7aff"
         paused={false}
         options={{ height: 80, amplitude: 100, speed: 0.25, points: 5 }}
         className="absolute bottom-0 left-0 w-full h-[40vh] z-0"
       />
 
-      {/* Logo */}
-      <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
-
       {/* Formulário */}
-      <div className="z-10 bg-green-800 text-white rounded shadow p-6 w-full max-w-md text-left">
+      <div className="z-10 bg-yellow-600 text-white rounded shadow p-6 w-full max-w-md text-left">
         <h2 className="text-2xl font-bold mb-4 text-center">Cadastro de Usuário</h2>
         <form onSubmit={handleCadastro} className="space-y-4">
           <input
@@ -51,7 +47,7 @@ export default function CadastroUsuario() {
             placeholder="Nome"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className="w-full border border-white bg-green-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+            className="w-full border border-white bg-yellow-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
             required
           />
           <input
@@ -59,7 +55,7 @@ export default function CadastroUsuario() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-white bg-green-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+            className="w-full border border-white bg-yellow-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
             required
           />
           <input
@@ -67,12 +63,12 @@ export default function CadastroUsuario() {
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
-            className="w-full border border-white bg-green-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
+            className="w-full border border-white bg-yellow-700 text-white rounded p-2 placeholder-white focus:outline-none focus:ring-2 focus:ring-white"
             required
           />
           <button
             type="submit"
-            className="w-full bg-white text-green-800 p-2 rounded hover:bg-gray-100 font-semibold"
+            className="w-full bg-white text-yellow-800 p-2 rounded hover:bg-gray-100 font-semibold"
           >
             Cadastrar
           </button>
@@ -86,7 +82,7 @@ export default function CadastroUsuario() {
       {/* Botão voltar embaixo */}
       <button
         onClick={() => navigate('/inicio')}
-        className="z-10 mt-6 text-green-800 underline font-semibold hover:text-green-900"
+        className="z-10 mt-6 text-yellow-800 underline font-semibold hover:text-yellow-900"
       >
         ← Voltar à tela inicial
       </button>

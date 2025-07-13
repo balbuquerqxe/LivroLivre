@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdotarModal from '../components/AdotarModal';
 import { useAuth } from '../contexts/AuthContext'; // Caminho corrigido
-import Wave from 'react-wavify';
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png';
+import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoazul.png';
 
 export default function ListaLivros() {
   const [livros, setLivros] = useState([]);
@@ -85,21 +84,14 @@ export default function ListaLivros() {
   );
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center bg-green-700 overflow-hidden px-4 py-10 text-white">
-      {/* Onda decorativa */}
-      <Wave
-        fill="#56c27cff"
-        paused={false}
-        options={{ height: 80, amplitude: 100, speed: 0.25, points: 5 }}
-        className="absolute bottom-0 left-0 w-full h-[40vh] z-0"
-      />
+    <div className="relative min-h-screen flex flex-col items-center bg-blue-300 overflow-hidden px-4 py-10 text-white">
 
       {/* Logo */}
       <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
 
       {/* Cartão principal */}
       <div className="z-10 w-full max-w-3xl bg-white p-6 rounded shadow text-black">
-        <h1 className="text-2xl font-bold mb-4 text-green-700">
+        <h1 className="text-2xl font-bold mb-4 text-blue-900">
           Livros Disponíveis
         </h1>
 
@@ -137,7 +129,7 @@ export default function ListaLivros() {
                     <strong>Doador:</strong> {livro.doador}
                   </p>
                   <button
-                    className="mt-2 bg-green-700 text-white px-4 py-1 rounded hover:bg-green-800"
+                    className="mt-2 bg-blue-900 text-white px-4 py-1 rounded hover:bg-blue-900"
                     onClick={() => {
                       setLivroSelecionado(livro);
                       setModalAberto(true);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'; // 'useState' não será mais neces
 import axios from 'axios'; // 'axios' não será mais necessário aqui se o AuthContext faz as chamadas
 import { useAuth } from '../contexts/AuthContext'; // Importa useAuth do seu contexto
 import Wave from 'react-wavify'; 
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoverde.png';
+import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoamarelo.png';
 
 export default function MeusLivros() {
     // --- MUDANÇA PRINCIPAL: Recebe as listas e o estado de carregamento do AuthContext ---
@@ -29,7 +29,7 @@ export default function MeusLivros() {
     // --- Lógica de carregamento e usuário não logado ---
     if (carregando) {
         return (
-            <div className="relative min-h-screen bg-green-700 flex flex-col items-center justify-center px-4 py-10 text-white">
+            <div className="relative min-h-screen bg-yellow-700 flex flex-col items-center justify-center px-4 py-10 text-white">
                 <p>Carregando seus livros...</p>
                 <img src={logo} alt="Logo LivroLivre" className="w-24 h-auto mt-4" />
             </div>
@@ -38,11 +38,11 @@ export default function MeusLivros() {
 
     if (!usuario) {
         return (
-            <div className="relative min-h-screen bg-green-700 flex flex-col items-center justify-center px-4 py-10 text-white">
+            <div className="relative min-h-screen bg-yellow-700 flex flex-col items-center justify-center px-4 py-10 text-white">
                 <p className="text-lg">Você precisa estar logado para ver seus livros.</p>
                 <button 
                     onClick={() => window.location.href = '/login'} // Redireciona para o login
-                    className="mt-4 bg-white text-green-700 px-6 py-2 rounded font-semibold hover:bg-gray-100"
+                    className="mt-4 bg-white text-yellow-700 px-6 py-2 rounded font-semibold hover:bg-gray-100"
                 >
                     Fazer Login
                 </button>
@@ -53,17 +53,17 @@ export default function MeusLivros() {
 
 
     return (
-        <div className="relative min-h-screen bg-green-700 flex flex-col items-center justify-start px-4 py-10 text-white overflow-hidden">
+        <div className="relative min-h-screen bg-yellow-100 flex flex-col items-center justify-start px-4 py-10 text-white overflow-hidden">
             {/* Logo */}
             <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
 
             {/* Conteúdo */}
             <div className="z-10 bg-white text-left text-black w-full max-w-3xl p-6 rounded shadow space-y-6">
-                <h1 className="text-2xl font-bold text-green-700 text-center">Meus Livros</h1>
+                <h1 className="text-2xl font-bold text-yellow-700 text-center">Meus Livros</h1>
 
                 {/* Livros Doados */}
                 <section>
-                    <h2 className="text-xl font-semibold mb-2 text-green-700">Livros Doados</h2>
+                    <h2 className="text-xl font-semibold mb-2 text-yellow-700">Livros Doados</h2>
                     {meusLivrosDoados.length === 0 ? ( // Usa a lista do contexto
                         <p className="text-gray-500">Você ainda não doou nenhum livro.</p>
                     ) : (
@@ -80,7 +80,7 @@ export default function MeusLivros() {
 
                 {/* Livros Adotados */}
                 <section>
-                    <h2 className="text-xl font-semibold mb-2 text-green-700">Livros Adotados</h2>
+                    <h2 className="text-xl font-semibold mb-2 text-yellow-700">Livros Adotados</h2>
                     {meusLivrosAdotados.length === 0 ? ( // Usa a lista do contexto
                         <p className="text-gray-500">Você ainda não adotou nenhum livro.</p>
                     ) : (
@@ -99,7 +99,7 @@ export default function MeusLivros() {
 
             {/* Onda */}
             <Wave
-                fill="#56c27cff"
+                fill="#e9cf7aff"
                 paused={false}
                 options={{ height: 80, amplitude: 100, speed: 0.25, points: 5 }}
                 className="absolute bottom-0 left-0 w-full h-[40vh] z-0"
