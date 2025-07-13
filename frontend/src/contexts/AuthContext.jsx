@@ -1,72 +1,85 @@
+// LivroLivre/frontend/src/contexts/AuthContext.jsx
+
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios'; // Importar axios aqui para usar nas novas funções
+import axios from 'axios'; // Importar axios para usar nas funções de fetch
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setLoading] = useState(true);
-  // --- NOVOS ESTADOS PARA LIVROS DO USUÁRIO ---
   const [meusLivrosDoados, setMeusLivrosDoados] = useState([]);
   const [meusLivrosAdotados, setMeusLivrosAdotados] = useState([]);
-  // --- FIM NOVOS ESTADOS ---
 
   useEffect(() => {
     const salvo = localStorage.getItem('usuario');
+    console.log('[AuthContext - useEffect] Valor salvo no localStorage:', salvo); 
     if (salvo) {
       const user = JSON.parse(salvo);
+      console.log('[AuthContext - useEffect] Usuario parseado do localStorage:', user); 
       setUsuario(user);
-      // Se o usuário já está salvo, tente buscar os livros dele ao carregar
-      if (user.email) {
-        fetchMeusLivros(user.email);
+      if (user.email) { 
+        // Busca os livros do usuario ao carregar (inicializa as listas e os créditos)
+        fetchMeusLivros(user.email); 
       }
     }
-    setLoading(false);
+    setLoading(false); 
   }, []);
 
-  // --- NOVA FUNÇÃO: Buscar Meus Livros (Doados e Adotados) ---
+  // --- FUNÇÃO CORRIGIDA: Buscar Meus Livros (Doados e Adotados) e ATUALIZAR CRÉDITOS ---
   const fetchMeusLivros = async (email) => {
     if (!email) return;
     try {
-      // A rota /api/livros/usuario/:email já retorna { creditos, doados, adotados }
       const response = await axios.get(`http://localhost:3001/api/livros/usuario/${email}`);
       const { creditos, doados, adotados } = response.data;
 
-      // Atualiza os estados do contexto
+      // Atualiza os estados das listas de livros no contexto
       setMeusLivrosDoados(doados);
       setMeusLivrosAdotados(adotados);
 
-      // Também atualiza os créditos no objeto usuário no estado e localStorage
-      const atualizado = { ...usuario, creditos };
-      setUsuario(atualizado);
-      localStorage.setItem('usuario', JSON.stringify(atualizado));
+      // --- A CORREÇÃO ESSENCIAL ESTÁ AQUI: ATUALIZA usuario SEM PERDER PROPRIEDADES ---
+      setUsuario(prevUsuario => {
+          // prevUsuario é o objeto usuario que estava no estado ANTES desta chamada.
+          // Isso garante que propriedades como 'id', 'nome', 'email', 'chaveStellar' não sejam perdidas.
+          const updatedUser = { 
+              ...prevUsuario, // Mantém todas as propriedades existentes do usuário
+              creditos: creditos // Apenas atualiza a propriedade 'creditos'
+          };
+          localStorage.setItem('usuario', JSON.stringify(updatedUser)); // Salva o objeto completo e atualizado no localStorage
+          return updatedUser;
+      });
+      // --- FIM CORREÇÃO ESSENCIAL ---
 
       console.log('[AuthContext] Meus livros e créditos atualizados para:', email);
     } catch (err) {
       console.error('[AuthContext] Erro ao buscar meus livros ou créditos:', err);
-      // Se der erro, pode limpar as listas para evitar exibir dados antigos
+      // Se der erro ao buscar (ex: usuário não encontrado, erro de rede), limpa as listas
       setMeusLivrosDoados([]);
       setMeusLivrosAdotados([]);
+      // E pode remover o usuário do estado/localStorage se for um erro de autenticação
+      if (err.response && err.response.status === 401) { // Exemplo para 401 Unauthorized
+          logout();
+      }
     }
   };
-  // --- FIM NOVA FUNÇÃO ---
+  // --- FIM FUNÇÃO CORRIGIDA ---
 
   function login(dadosUsuario) {
-    setUsuario(dadosUsuario);
+    console.log('[AuthContext - login] Dados recebidos para login (completos):', dadosUsuario); 
+    setUsuario(dadosUsuario); // Define o usuário completo recebido do backend
     localStorage.setItem('usuario', JSON.stringify(dadosUsuario));
-    // Ao fazer login, também busca os livros do usuário
-    fetchMeusLivros(dadosUsuario.email);
+    // Após o login, aciona o fetch para pegar créditos e listas e atualizar o objeto usuario
+    fetchMeusLivros(dadosUsuario.email); 
   }
 
   function logout() {
     setUsuario(null);
     localStorage.removeItem('usuario');
-    // Ao fazer logout, limpa as listas de livros
     setMeusLivrosDoados([]);
     setMeusLivrosAdotados([]);
   }
 
-  // A função atualizarCreditos agora pode chamar fetchMeusLivros, que já atualiza os créditos
+  // A função atualizarCreditos agora simplesmente chama fetchMeusLivros, que já faz tudo
   async function atualizarCreditos(email) {
     await fetchMeusLivros(email);
   }
@@ -78,13 +91,14 @@ export function AuthProvider({ children }) {
       logout, 
       carregando, 
       atualizarCreditos, 
-      meusLivrosDoados, // Exporta os novos estados
-      meusLivrosAdotados, // Exporta os novos estados
-      fetchMeusLivros // Exporta a função para re-fetch manual
+      meusLivrosDoados, 
+      meusLivrosAdotados, 
+      fetchMeusLivros 
     }}>
       {children}
     </AuthContext.Provider>
   );
+
 }
 
 export const useAuth = () => useContext(AuthContext);
