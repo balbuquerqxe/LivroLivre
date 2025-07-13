@@ -59,7 +59,7 @@ export default function MeusLivros() {
 
             {/* Conteúdo */}
             <div className="z-10 bg-white text-left text-black w-full max-w-3xl p-6 rounded shadow space-y-6">
-                <h1 className="text-2xl font-bold text-yellow-700 text-center">Meus Livros</h1>
+                <h1 className="text-2xl font-bold text-yellow-700 text">Meus Livros</h1>
 
                 {/* Livros Doados */}
                 <section>
