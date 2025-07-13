@@ -135,8 +135,12 @@ async function adotarLivro(req, res) {
     }
 
     // Cria automaticamente o chat entre doador e adotante
-    await criarChat(livro.id, livro.doador, adotante);
-
+    try {
+      await criarChat(livro.id, livro.titulo, livro.doador, adotante);
+    } catch (errChat) {
+      console.error('[ADOTAR] Erro ao criar chat:', errChat.message || errChat);
+      // Não interrompe o processo, pois o restante deu certo
+    }
     return res.json({ mensagem: 'Livro adotado, token enviado e chat criado!', livro: livroAtualizado });
 
   } catch (err) {

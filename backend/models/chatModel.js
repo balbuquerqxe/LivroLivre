@@ -6,19 +6,33 @@ function parseMensagens(str) {
   try { return JSON.parse(str || '[]'); } catch { return []; }
 }
 
-/* ---------- CRUD --------------- */
 function criarChat(livroId, titulo, doador, adotante) {
   return new Promise((resolve, reject) => {
     const sql = `
-      INSERT INTO chats (livroId, doador, adotante, mensagens)
-      VALUES (?, ?, ?, '[]')
+      INSERT INTO chats (livroId, doador, adotante, mensagens, criadoEm, resolvido)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
-    db.run(sql, [livroId, doador, adotante], function (err) {
-      if (err) return reject(err);
-      resolve({ id: this.lastID, livroId, titulo, doador, adotante, mensagens: [] });
-    });
+    const agora = new Date().toISOString();
+    db.run(
+      sql,
+      [livroId, doador, adotante, '[]', agora, false],
+      function (err) {
+        if (err) return reject(err);
+        resolve({
+          id: this.lastID,
+          livroId,
+          titulo,
+          doador,
+          adotante,
+          mensagens: [],
+          criadoEm: agora,
+          resolvido: false,
+        });
+      }
+    );
   });
 }
+
 
 function buscarChatPorId(id) {
   return new Promise((resolve, reject) => {

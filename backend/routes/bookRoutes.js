@@ -18,22 +18,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 🧠 Importa apenas o que existe de fato no seu controller
+// --- Importa TODAS as funções do controller ---
 const {
-  adotarLivro
-} = require('../controllers/bookController'); // ✅ ajuste o caminho se estiver diferente
-
-// 🔒 Se quiser usar autenticação futuramente:
-// const authMiddleware = require('../middleware/auth');
+  cadastrarLivro,
+  listarLivros,
+  adotarLivro,
+  listarLivrosDoUsuario
+} = require('../controllers/bookController');
 
 // --------------------------------------------------------------------------
 // Rotas de Livros
 // --------------------------------------------------------------------------
 
-// POST /api/livros/:id/adotar
+// POST /api/livros ➜ cadastrar livro (com imagem)
+router.post('/', upload.single('imagem'), cadastrarLivro);
+
+// GET /api/livros ➜ listar livros disponíveis
+router.get('/', listarLivros);
+
+// POST /api/livros/:id/adotar ➜ adotar livro
 router.post('/:id/adotar', adotarLivro);
 
-// ⚠️ Caso for adicionar outras rotas como cadastrarLivro ou listarLivros,
-// adicione aqui apenas se essas funções forem exportadas corretamente do controller.
+// GET /api/livros/usuario/:email ➜ livros doados/adotados + créditos do usuário
+router.get('/usuario/:email', listarLivrosDoUsuario);
 
 module.exports = router;
