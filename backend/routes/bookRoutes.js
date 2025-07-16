@@ -1,24 +1,31 @@
-// LivroLivre/backend/routes/bookRoutes.js
-
+// Importa o Express
 const express = require('express');
+
+// Inicializa o router
 const router = express.Router();
+
+// Importa o multer que faz o upload de imagem
 const multer = require('multer');
+
+// Lida com os caminhos
 const path = require('path');
 
-// Configuração do destino e nome do arquivo para upload de imagem
+// Configura o destino e o nome do arquivo para imagens enviadas
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, path.join(__dirname, '../uploads')); // Pasta onde a imagem será salva
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);  // Exemplo: 1720978629182.jpg
+    const ext = path.extname(file.originalname);  // Captura a extensão original
+    cb(null, Date.now() + ext);                   // Gera um nome único com timestamp
   }
 });
 
+// Ttrata os uploads de imagem
 const upload = multer({ storage });
 
-// --- Importa TODAS as funções do controller ---
+
+// Importa as funções do controller de livros
 const {
   cadastrarLivro,
   listarLivros,
@@ -26,20 +33,18 @@ const {
   listarLivrosDoUsuario
 } = require('../controllers/bookController');
 
-// --------------------------------------------------------------------------
-// Rotas de Livros
-// --------------------------------------------------------------------------
-
-// POST /api/livros ➜ cadastrar livro (com imagem)
+// Rota para cadastrar um novo livro (com imagem)
 router.post('/', upload.single('imagem'), cadastrarLivro);
 
-// GET /api/livros ➜ listar livros disponíveis
+// Rota para listar todos os livros disponíveis
 router.get('/', listarLivros);
 
-// POST /api/livros/:id/adotar ➜ adotar livro
+// Rota para adotar um livro pelo ID
 router.post('/:id/adotar', adotarLivro);
 
-// GET /api/livros/usuario/:email ➜ livros doados/adotados + créditos do usuário
+// Rota para buscar os livros de um usuário (doado + adotado) + seus créditos
 router.get('/usuario/:email', listarLivrosDoUsuario);
 
+
+// Exporta o router para ser usado na aplicação principal
 module.exports = router;
