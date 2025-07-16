@@ -1,28 +1,37 @@
+// Importa o Express
 const express = require('express');
-const router  = express.Router();
-const db      = require('../database');
 
-/* -------- helper ------------ */
+// Inicializa o router
+const router = express.Router();
+
+// Importa o banco de dados SQL
+const db = require('../database');
+
+// Função que busca chat por ID
 function buscarChatPorId(id) {
   return new Promise((resolve, reject) => {
     db.get('SELECT * FROM chats WHERE id = ?', [id], (err, row) => {
       if (err) return reject(err);
+
+      // Faz o parse das mensagens armazenadas em formato JSON
       if (row) {
         try { row.mensagens = JSON.parse(row.mensagens || '[]'); }
         catch { row.mensagens = []; }
       }
+
       resolve(row);
     });
   });
 }
 
-/* ---------- ROTAS ----------- */
-
-/* 1) Buscar um chat pelo ID */
+// Busca um chat específico pelo ID
 router.get('/id/:id', async (req, res) => {
   try {
     const chat = await buscarChatPorId(req.params.id);
-    if (!chat) return res.status(404).json({ erro: 'Chat não encontrado.' });
+
+    if (!chat)
+      return res.status(404).json({ erro: 'Chat não encontrado.' });
+
     res.json(chat);
   } catch (err) {
     console.error('Erro ao buscar chat por ID:', err);
@@ -30,18 +39,23 @@ router.get('/id/:id', async (req, res) => {
   }
 });
 
-/* 2) Enviar nova mensagem */
+
+// Envia uma nova mensagem para um chat
 router.post('/:id/mensagem', async (req, res) => {
-  const chatId        = req.params.id;
-  const novaMensagem  = req.body;           // { remetente, texto }
+  const chatId = req.params.id;
+  const novaMensagem = req.body;
 
   try {
     const chat = await buscarChatPorId(chatId);
-    if (!chat) return res.status(404).json({ erro: 'Chat não encontrado.' });
 
+    if (!chat)
+      return res.status(404).json({ erro: 'Chat não encontrado.' });
+
+    // Garante que mensagens seja um array e adiciona a nova mensagem
     const mensagens = Array.isArray(chat.mensagens) ? chat.mensagens : [];
     mensagens.push({ ...novaMensagem, data: new Date().toISOString() });
 
+    // Atualiza o chat com a nova lista de mensagens
     db.run(
       'UPDATE chats SET mensagens = ? WHERE id = ?',
       [JSON.stringify(mensagens), chatId],
@@ -59,7 +73,8 @@ router.post('/:id/mensagem', async (req, res) => {
   }
 });
 
-/* 3) Resolver entrega  ➜  (frontend faz DELETE /api/chats/:id) */
+
+// Marca a entrega como resolvida (encerra o chat daí)
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
 
@@ -68,14 +83,17 @@ router.delete('/:id', (req, res) => {
       console.error('Erro ao resolver chat:', err.message);
       return res.status(500).json({ erro: 'Erro ao resolver entrega.' });
     }
+
     if (this.changes === 0) {
       return res.status(404).json({ erro: 'Chat não encontrado.' });
     }
-    res.json({ mensagem: 'Entrega resolvida com sucesso.' });
+
+    res.json({ mensagem: 'Entrega resolvida com sucesso!' });
   });
 });
 
-/* 4) Listar chats de um usuário (doador ou adotante) */
+
+// Lista todos os chats de um usuário (doador ou adotante)
 router.get('/:email', (req, res) => {
   const { email } = req.params;
 
@@ -91,8 +109,9 @@ router.get('/:email', (req, res) => {
       return res.status(500).json({ erro: 'Erro interno ao buscar chats.' });
     }
 
+    // Faz o parse das mensagens para cada chat encontrado
     const chats = rows.map(c => {
-      try   { c.mensagens = JSON.parse(c.mensagens || '[]'); }
+      try { c.mensagens = JSON.parse(c.mensagens || '[]'); }
       catch { c.mensagens = []; }
       return c;
     });
@@ -101,4 +120,6 @@ router.get('/:email', (req, res) => {
   });
 });
 
+
+// Exporta o router para ser usado pela aplicação principal
 module.exports = router;
