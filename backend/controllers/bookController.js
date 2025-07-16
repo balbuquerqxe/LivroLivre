@@ -100,13 +100,27 @@ async function adotarLivro(req, res) {
   const creditosAtuais = await consultarCreditos(adotante);
   console.log(`[DEBUG] Créditos do adotante (${adotante}): ${creditosAtuais}`);
 
-  // Tenta descontar 1 crédito
-  const creditoUsadoComSucesso = await usarCredito(adotante);
-  if (!creditoUsadoComSucesso) {
+  // Garante que o usuário NUNCA ficará com crédito negativo
+  if (creditosAtuais < 1) {
     return res.status(403).json({ erro: 'Você não possui créditos suficientes para adotar um livro.' });
   }
 
+  // Tenta descontar 1 crédito (seguro porque já foi verificado)
+  const creditoUsadoComSucesso = await usarCredito(adotante);
+  if (!creditoUsadoComSucesso) {
+    // Mesmo que useCredito retorne falso por alguma inconsistência, continua seguro
+    return res.status(403).json({ erro: 'Não foi possível usar seu crédito. Tente novamente mais tarde.' });
+  }
+
   try {
+    // Revalida o status do livro para evitar duplicações (concorrência ou clique duplo)
+    const livroRevalidado = await buscarLivroPorId(id);
+    if (livroRevalidado.adotadoPor) {
+      // Se já foi adotado enquanto processava, devolve crédito
+      await adicionarCredito(adotante);
+      return res.status(400).json({ erro: 'Este livro acabou de ser adotado por outra pessoa.' });
+    }
+
     // Envia o token para o adotante usando Stellar
     const { hash } = await sendBookToken(livro.chaveStellarDoador);
 
@@ -140,7 +154,6 @@ async function adotarLivro(req, res) {
 
     return res.json({ mensagem: 'Livro adotado, token enviado e chat criado!', livro: livroAtualizado });
   } catch (err) {
-
     // Se algo der errado, devolve o crédito
     await adicionarCredito(adotante);
     console.error('[LIVRO] Falha ao processar adoção/enviar token:', err.message || err);
