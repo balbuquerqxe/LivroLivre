@@ -23,6 +23,8 @@ Para tornar tudo isso possível, criamos uma plataforma digital!
 
 ## Funcionamento da plataforma
 
+**`Vídeo no Youtube:`** https://youtu.be/G4Fw6O-wDAw
+
 A dinâmica é simples: cada vez que uma pessoa doa um livro, ela recebe um crédito dentro do sistema. Esse crédito permite que ela adote outro livro disponível na plataforma.
 
 Ou seja, o **LivroLivre** funciona como uma troca mediada: você doa um livro, ganha um crédito e pode usá-lo para adotar outro livro.
