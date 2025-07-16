@@ -1,8 +1,13 @@
-# LivroLivre: um pouco sobre o projeto
 
-![Logo do LivroLivre](frontend/src/assets/logoverde1.png)
+<h1 align="center">LivroLivre: um pouco sobre o projeto</h1>
+
+<p align="center">
+  <img src="frontend/src/assets/logoverde1.png" alt="Logo do LivroLivre" width="250">
+</p>
 
 ---
+
+<div align="justify">
 
 ## Contextualização
 
@@ -47,7 +52,6 @@ Essa escolha garante que os registros de contribuição não fiquem presos apena
 Atualmente, o LivroLivre está operando na **Testnet da Stellar**.
 
 ---
-
 
 ## Como usar o programa no meu dispositivo?
 
@@ -114,3 +118,5 @@ A aplicação estará acessível em `http://localhost:5173`.
 Agora você pode começar a usar a plataforma: doar livros, ganhar créditos e adotar novas leituras!
 
 Aproveite!!
+
+</div>
