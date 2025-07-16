@@ -1,36 +1,45 @@
+// Hooks e bibliotecas necessárias
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Wave from 'react-wavify';
 
+// Componente principal de login
 export default function LoginUsuario() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth();            // Função de login do contexto
+  const navigate = useNavigate();         // Hook para redirecionar após login
 
+  // Estados para armazenar campos do formulário e mensagens de erro
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
+  // Função chamada ao submeter o formulário
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Previne reload da página
 
     try {
+      // Envia email e senha para o backend
       const resposta = await axios.post('http://localhost:3001/api/usuarios/login', {
         email,
         senha,
       });
 
+      // Se sucesso, chama login do contexto e redireciona para a home
       login(resposta.data.usuario);
       navigate('/');
     } catch (err) {
+
+      // Caso erro exibe mensagem
       setErro('E-mail ou senha inválidos.');
     }
   };
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center text-center bg-pink-100 overflow-hidden px-4">
-      {/* Onda rosa clara */}
+      
+      {/* Onda rosa clara no fundo */}
       <Wave
         fill="#FFC0CB"
         paused={false}
@@ -45,6 +54,7 @@ export default function LoginUsuario() {
       >
         <h1 className="text-2xl font-bold text-center mb-4">Login</h1>
 
+        {/* Campo de e-mail */}
         <input
           type="email"
           placeholder="Email"
@@ -54,6 +64,7 @@ export default function LoginUsuario() {
           required
         />
 
+        {/* Campo de senha */}
         <input
           type="password"
           placeholder="Senha"
@@ -63,10 +74,12 @@ export default function LoginUsuario() {
           required
         />
 
+        {/* Mensagem de erro, se houver */}
         {erro && (
           <p className="text-red-400 text-sm text-center mb-3">{erro}</p>
         )}
 
+        {/* Botão de login */}
         <button
           type="submit"
           className="w-full bg-white text-pink-800 py-2 rounded hover:bg-gray-100 font-semibold"
@@ -74,6 +87,7 @@ export default function LoginUsuario() {
           Entrar
         </button>
 
+        {/* Link para criar nova conta */}
         <Link
           to="/cadastro-usuario"
           className="block text-center text-white text-sm mt-4 underline hover:text-pink-100"
