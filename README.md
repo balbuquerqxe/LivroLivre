@@ -92,7 +92,13 @@ npm install
 
 ```bash
 cd backend
-npm run dev ou node app.js
+npm run dev
+```
+ou
+
+```bash
+cd backend
+npm node app.js
 ```
 
 ### 5. Rode o frontend
