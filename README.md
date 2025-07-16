@@ -1,4 +1,3 @@
-
 <h1 align="center">LivroLivre: um pouco sobre o projeto</h1>
 
 <p align="center">
@@ -77,6 +76,7 @@ Você precisará instalar as bibliotecas do backend e do frontend separadamente:
 ```bash
 cd backend
 npm install
+npm install sqlite3 --build-from-source
 ```
 
 **Frontend:**
@@ -85,6 +85,8 @@ npm install
 cd ../frontend
 npm install
 ```
+
+> Observação: o pacote `sqlite3` depende de arquivos nativos que, no macOS, podem gerar bloqueios de segurança. Caso o sistema impeça a execução (exibindo mensagem sobre `node_sqlite3.node`), acesse **Preferências do Sistema > Segurança e Privacidade > Geral** e clique em **“Permitir”**.
 
 ### 3. Configure as variáveis de ambiente (não precisa!!!)
 
@@ -95,12 +97,6 @@ npm install
 ```bash
 cd backend
 npm run dev
-```
-ou
-
-```bash
-cd backend
-npm node app.js
 ```
 
 ### 5. Rode o frontend
