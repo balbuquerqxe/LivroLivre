@@ -31,7 +31,7 @@ Para que essa lógica funcione na prática, estruturamos a plataforma em torno d
 
 - `Livros`: exibe todos os livros disponíveis para adoção, com possibilidade de filtro por título ou autor.
 - `Cadastrar Livro`: permite que o usuário doe um livro, preenchendo informações como título, autor e adicionando uma imagem da capa.
-- `Meus Livros`: reúne, em um só lugar, todos os livros que o usuário já doou ou adotou.
+- `Meus Livros`: junta, em um só lugar, todos os livros que o usuário já doou ou adotou.
 - `Meus Chats`: apresenta as conversas entre doadores e adotantes. Essa funcionalidade foi criada para que os envolvidos na troca combinem diretamente como será feita a entrega do livro. Uma vez resolvida a entrega, o chat pode ser encerrado.
 
 ---
@@ -55,9 +55,9 @@ Atualmente, o LivroLivre está operando na **Testnet da Stellar**.
 
 ## Como usar o programa no meu dispositivo?
 
-Como o programa é só um protótipo e não está lidando com dados reais, não tem problema utilizar as minhas senhas da plataforma Stellar que já estão configuradas no projeto. Mas, se algum dia o programa for lançado oficialmente, essas chaves precisariam ser modificadas para cada pessoa que for usar, garantindo a segurança e individualidade das contas Stellar.
+Como o programa é só um protótipo e não está lidando com dados reais, não tem problema utilizar as senhas da plataforma Stellar que já estão configuradas no projeto. Mas, se algum dia o programa for lançado oficialmente, essas chaves precisariam ser modificadas para cada pessoa que for usar, garantindo a segurança e individualidade das contas Stellar.
 
-Por isso, você **não precisa alterar a chave Stellar** neste momento para testar a aplicação. Basta seguir os passos abaixo para rodar o projeto localmente:
+Por isso, você **não deve alterar a chave Stellar** neste momento para testar a aplicação. Basta seguir os passos abaixo para rodar o projeto localmente:
 
 ### 1. Clone o repositório
 
@@ -86,20 +86,13 @@ npm install
 
 ### 3. Configure as variáveis de ambiente (não precisa!!!)
 
-No diretório `backend`, crie um arquivo `.env` com a seguinte estrutura:
-
-```env
-STELLAR_SECRET_KEY=SUA_CHAVE_SECRETA_DA_CONTA_EMISSORA
-STELLAR_PUBLIC_KEY=CHAVE_PUBLICA_DA_CONTA_EMISSORA
-```
-
 **Essas chaves já estão disponíveis no projeto e não precisam ser alteradas neste momento**, pois funcionam para testes na rede de desenvolvimento da Stellar (Testnet).
 
 ### 4. Rode o backend
 
 ```bash
 cd backend
-node app.js
+npm run dev ou node app.js
 ```
 
 ### 5. Rode o frontend
