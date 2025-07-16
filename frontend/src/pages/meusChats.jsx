@@ -1,4 +1,4 @@
-// frontend/src/pages/MeusChats.jsx
+// Hooks e bibliotecas necessárias
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
@@ -10,18 +10,16 @@ export default function MeusChats() {
   const { usuario } = useAuth();
   const [chats, setChats] = useState([]);
   const [erro, setErro] = useState("");
-
   const navigate = useNavigate();
 
-  /* --------------------------------------------------------- */
-  /* Carrega chats quando o usuário estiver disponível          */
-  /* --------------------------------------------------------- */
+  // Busca os chats do usuário assim que o componente for carregado
   useEffect(() => {
     if (usuario?.email) {
       fetchChats(usuario.email);
     }
   }, [usuario]);
 
+  // Requisição GET: traz todos os chats do usuário logado
   async function fetchChats(email) {
     try {
       const res = await axios.get(`http://localhost:3001/api/chats/${email}`);
@@ -32,9 +30,7 @@ export default function MeusChats() {
     }
   }
 
-  /* --------------------------------------------------------- */
-  /* Marcar entrega como resolvida (deleta chat)               */
-  /* --------------------------------------------------------- */
+  // Requisição DELETE: exclui o chat quando a entrega é resolvida
   async function resolverEntrega(chatId) {
     try {
       await axios.delete(`http://localhost:3001/api/chats/${chatId}`);
@@ -45,12 +41,10 @@ export default function MeusChats() {
     }
   }
 
-  /* --------------------------------------------------------- */
-  /* UI                                                         */
-  /* --------------------------------------------------------- */
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-start bg-green-100 px-4 py-10 text-white overflow-hidden">
-      {/* Onda de fundo */}
+
+      {/* Fundo animado com onda verde */}
       <Wave
         fill="#6dc074ff"
         paused={false}
@@ -61,7 +55,7 @@ export default function MeusChats() {
       {/* Logo */}
       <img src={logo} alt="Logo LivroLivre" className="w-48 h-auto mb-6 z-10" />
 
-      {/* Card principal */}
+      {/* Card com os chats */}
       <div className="bg-green-800 text-black z-10 p-6 rounded shadow w-full max-w-xl">
         <h1 className="text-2xl font-bold mb-4 text-white">Meus Chats</h1>
 
@@ -76,21 +70,16 @@ export default function MeusChats() {
                 key={chat.id}
                 className="border border-green-700 bg-green-100 rounded p-4 text-black shadow-sm"
               >
-                <p>
-                  <strong>Livro ID:</strong> {chat.livroId}
-                </p>
-                <p>
-                  <strong>Doador:</strong> {chat.doador}
-                </p>
-                <p>
-                  <strong>Adotante:</strong> {chat.adotante}
-                </p>
+                <p><strong>Livro ID:</strong> {chat.livroId}</p>
+                <p><strong>Doador:</strong> {chat.doador}</p>
+                <p><strong>Adotante:</strong> {chat.adotante}</p>
                 <p>
                   <strong>Mensagens:</strong> {chat.mensagens.length}{" "}
                   {chat.mensagens.length === 1 ? "mensagem" : "mensagens"}
                 </p>
 
                 <div className="mt-4 flex gap-4">
+                  {/* Abre a conversa */}
                   <button
                     onClick={() => navigate(`/chat/${chat.id}`)}
                     className="bg-green-600 hover:bg-green-800 text-white px-4 py-1 rounded w-full sm:w-auto"
@@ -98,6 +87,7 @@ export default function MeusChats() {
                     Abrir Chat
                   </button>
 
+                  {/* Marca a entrega como resolvida e apaga o chat */}
                   <button
                     onClick={() => resolverEntrega(chat.id)}
                     className="bg-green-600 hover:bg-green-800 text-white px-4 py-1 rounded w-full sm:w-auto"
