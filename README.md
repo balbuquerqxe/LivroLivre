@@ -1,5 +1,7 @@
 # LivroLivre: um pouco sobre o projeto
 
+![Logo do LivroLivre](frontend/src/assets/logoverde1.png)
+
 ---
 
 ## Contextualização
