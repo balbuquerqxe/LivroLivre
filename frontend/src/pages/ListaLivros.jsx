@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdotarModal from '../components/AdotarModal';
 import { useAuth } from '../contexts/AuthContext';
-import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoazul.png';
+import logo from '/Users/buba/LivroLivre/LivroLivre/frontend/src/assets/logoazul1.png';
 import Wave from 'react-wavify';
 
 export default function ListaLivros() {

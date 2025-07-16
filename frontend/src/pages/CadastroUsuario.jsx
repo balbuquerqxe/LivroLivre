@@ -20,7 +20,7 @@ export default function CadastroUsuario() {
         senha,
       });
 
-      setMensagem('Cadastro realizado com sucesso! Redirecionando para o login...');
+      setMensagem('Cadastro realizado com sucesso! Aguarde...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
       setMensagem('Erro ao cadastrar usuário.');
